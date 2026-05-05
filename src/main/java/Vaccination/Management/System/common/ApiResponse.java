@@ -1,23 +1,38 @@
 package Vaccination.Management.System.common;
+import Vaccination.Management.System.exception.ErrorCode;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Builder;
+import lombok.Getter;
 
-import java.time.LocalDateTime;
-
-@Data
-@AllArgsConstructor
+@Getter
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
-    private boolean success;
+
+    private int code;
     private String message;
-    private T data;
-    private LocalDateTime timestamp;
+    private T result;
 
     public static <T> ApiResponse<T> success(T data) {
-        return new ApiResponse<>(true, "Success", data, LocalDateTime.now());
+        return ApiResponse.<T>builder()
+                .code(ErrorCode.SUCCESS.getCode())
+                .message(ErrorCode.SUCCESS.getMessage())
+                .result(data)
+                .build();
     }
 
-    public static <T> ApiResponse<T> error(String message) {
-        return new ApiResponse<>(false, message, null, LocalDateTime.now());
+    public static <T> ApiResponse<T> success() {
+        return ApiResponse.<T>builder()
+                .code(ErrorCode.SUCCESS.getCode())
+                .message(ErrorCode.SUCCESS.getMessage())
+                .build();
+    }
+
+    public static <T> ApiResponse<T> error(ErrorCode errorCode) {
+        return ApiResponse.<T>builder()
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
+                .build();
     }
 }

@@ -1,6 +1,7 @@
 package Vaccination.Management.System.service;
 
-import Vaccination.Management.System.exception.DuplicateResourceException;
+import Vaccination.Management.System.exception.AppException;
+import Vaccination.Management.System.exception.ErrorCode;
 import Vaccination.Management.System.model.dto.auth.CreateLoginRequest;
 import Vaccination.Management.System.model.dto.auth.LoginResponse;
 import Vaccination.Management.System.model.dto.auth.CreateRegisterRequest;
@@ -25,7 +26,7 @@ public class AuthService {
 
     public void register(CreateRegisterRequest request) {
         if (userRepository.existsByPhone(request.getPhone())) {
-            throw new DuplicateResourceException("Phone number already in use");
+            throw new AppException(ErrorCode.USER_EXISTED);
         }
         User user = User.builder()
                 .phone(request.getPhone())
@@ -38,12 +39,17 @@ public class AuthService {
     }
 
     public LoginResponse login(CreateLoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getPhone(), request.getPassword()
-                )
-        );
-        User user = userRepository.findByPhone(request.getPhone()).orElseThrow();
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getPhone(), request.getPassword()
+                    )
+            );
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.INVALID_CREDENTIALS);
+        }
+        User user = userRepository.findByPhone(request.getPhone())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         String token = jwtUtil.generateToken(user.getPhone(), user.getRole().name());
         return new LoginResponse(token, user.getRole().name());
     }

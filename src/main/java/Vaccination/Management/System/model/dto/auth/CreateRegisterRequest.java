@@ -8,15 +8,15 @@ import lombok.Data;
 @Data
 public class CreateRegisterRequest {
 
-    @NotBlank(message = "Phone is required")
-    @Pattern(regexp = "^[0-9]{10,15}$", message = "Phone must be 10-15 digits")
+    @NotBlank(message = "INVALID_PHONE")
+    @Pattern(regexp = "^[0-9]{10,15}$", message = "INVALID_PHONE")
     private String phone;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 8, message = "Password must be at least 8 characters")
+    @NotBlank(message = "INVALID_PASSWORD")
+    @Size(min = 6, message = "INVALID_PASSWORD")
     private String password;
 
-    @NotBlank(message = "Full name is required")
+    @NotBlank(message = "UNCATEGORIZED")
     private String fullName;
 
     private String email;
