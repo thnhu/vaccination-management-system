@@ -1,5 +1,3 @@
-
-```markdown
 # Vaccination Management System - National Vaccination MVP
 
 A robust Java Spring Boot backend system for managing national vaccination records, appointments, vaccine batches, and citizen profiles.
@@ -27,19 +25,8 @@ A robust Java Spring Boot backend system for managing national vaccination recor
 
 ## Project Structure
 
-```
-com.yourname.vaccination/
-├── controller/
-├── service/
-├── repository/
-├── model/
-│   ├── entity/
-│   └── dto/
-├── exception/
-├── security/
-├── common/
-└── VaccinationApplication.java
-```
+
+
 
 ## Prerequisites
 
@@ -101,8 +88,6 @@ All endpoints are prefixed with `/vaccination`
 - `POST /vaccination/vaccination-records/retrospective` (Medical staff)
 - `GET /vaccination/citizens/me` (Citizen)
 
-> Role-based authorization is strictly enforced using JWT.
-
 ## Important Design Highlights
 
 - Vaccination records are **immutable** (no UPDATE or DELETE) to ensure legal compliance and full audit trail.
@@ -115,9 +100,3 @@ All endpoints are prefixed with `/vaccination`
 - Branch strategy: `main` → feature branches
 - Conventional Commits
 - Clear separation of concerns (Controller → Service → Repository)
-
----
-
-**Ready for deployment** on Railway, Render, or any Spring Boot supported platform.
-
-```
