@@ -28,13 +28,18 @@ public class SecurityConfig {
                 .sessionManagement(s ->
                         s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/vaccination/swagger-ui/**",
+                                "/vaccination/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**"
+                        ).permitAll()
                         .requestMatchers("/vaccination/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/vaccination/vaccines/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/vaccination/facilities/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/vaccination/citizens/me").hasRole("CITIZEN")
-                        .requestMatchers("/vaccination/vaccination-records/**").hasRole("STAFF")
-                        .requestMatchers("/vaccination/appointments/today").hasRole("STAFF")
+                        .requestMatchers("/vaccination/vaccination-records/**").hasRole("MEDICAL_STAFF")
+                        .requestMatchers("/vaccination/appointments/today").hasRole("MEDICAL_STAFF")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
