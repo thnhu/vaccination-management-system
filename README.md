@@ -9,7 +9,6 @@ A robust Java Spring Boot backend system for managing national vaccination recor
 - **Security**: Spring Security + JWT
 - **ORM**: Spring Data JPA + Hibernate
 - **Database**: SQL Server
-- **API Documentation**: Springdoc OpenAPI (Swagger UI)
 - **Build Tool**: Maven
 
 ## Key Features
