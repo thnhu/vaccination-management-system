@@ -5,7 +5,7 @@ A robust Java Spring Boot backend system for managing national vaccination recor
 ## Tech Stack
 
 - **Java**: 21
-- **Framework**: Spring Boot 4.0.5
+- **Framework**: Spring Boot 4.0.6
 - **Security**: Spring Security + JWT
 - **ORM**: Spring Data JPA + Hibernate
 - **Database**: SQL Server
