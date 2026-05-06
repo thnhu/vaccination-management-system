@@ -13,7 +13,7 @@ public class CreateRegisterRequest {
     private String phone;
 
     @NotBlank(message = "INVALID_PASSWORD")
-    @Size(min = 6, message = "INVALID_PASSWORD")
+    @Size(min = 8, message = "INVALID_PASSWORD")
     private String password;
 
     @NotBlank(message = "UNCATEGORIZED")

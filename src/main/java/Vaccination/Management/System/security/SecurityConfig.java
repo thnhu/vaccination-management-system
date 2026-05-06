@@ -28,18 +28,18 @@ public class SecurityConfig {
                 .sessionManagement(s ->
                         s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/vaccination/swagger-ui/**",
-                                "/vaccination/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**"
-                        ).permitAll()
-                        .requestMatchers("/vaccination/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/vaccination/vaccines/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/vaccination/facilities/**").permitAll()
-                        .requestMatchers("/vaccination/citizens/me").hasRole("CITIZEN")
-                        .requestMatchers("/vaccination/vaccination-records/**").hasRole("MEDICAL_STAFF")
-                        .requestMatchers("/vaccination/appointments/today").hasRole("MEDICAL_STAFF")
+//                        .requestMatchers(
+//                                "/vaccination/swagger-ui/**",
+//                                "/vaccination/v3/api-docs/**",
+//                                "/swagger-ui/**",
+//                                "/v3/api-docs/**"
+//                        ).permitAll()
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/vaccines/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/facilities/**").permitAll()
+                        .requestMatchers("/citizens/me").hasRole("CITIZEN")
+                        .requestMatchers("/vaccination-records/**").hasRole("MEDICAL_STAFF")
+                        .requestMatchers("/appointments/today").hasRole("MEDICAL_STAFF")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
