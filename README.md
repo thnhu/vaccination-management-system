@@ -42,18 +42,13 @@ A robust Java Spring Boot backend system for managing national vaccination recor
    ```
 
 2. **Configure database**
-   Update `src/main/resources/application.yml` (or `application.properties`) with your SQL Server connection details.
+   Update `src/main/resources/application.properties` with your SQL Server connection details.
 
 3. **Build and run**
    ```bash
    mvn spring-boot:run
    ```
 
-4. **Access Swagger UI**
-   Open your browser and go to:
-   ```
-   http://localhost:8080/swagger-ui.html
-   ```
 
 ## API Base Path
 
@@ -62,30 +57,30 @@ All endpoints are prefixed with `/vaccination`
 ### Main Modules
 
 **Authentication**
-- `POST /vaccination/auth/register`
-- `POST /vaccination/auth/login`
+- `POST /auth/register`
+- `POST /auth/login`
 
 **Vaccine**
-- `POST /vaccination/vaccines`
-- `GET /vaccination/vaccines`
-- `GET /vaccination/vaccines/{id}`
+- `POST /vaccines`
+- `GET /vaccines`
+- `GET /vaccines/{id}`
 
 **Facility**
-- `POST /vaccination/facilities`
-- `GET /vaccination/facilities`
+- `POST /facilities`
+- `GET /facilities`
 
 **Vaccine Batch**
-- `POST /vaccination/facilities/{id}/batches`
+- `POST /facilities/{id}/batches`
 
 **Appointment**
-- `POST /vaccination/appointments` (Citizen)
-- `GET /vaccination/appointments/my` (Citizen)
-- `GET /vaccination/appointments/today` (Medical staff)
+- `POST /appointments` (Citizen)
+- `GET /appointments/my` (Citizen)
+- `GET /appointments/today` (Medical staff)
 
 **Vaccination Record**
-- `POST /vaccination/vaccination-records` (Medical staff)
-- `POST /vaccination/vaccination-records/retrospective` (Medical staff)
-- `GET /vaccination/citizens/me` (Citizen)
+- `POST /vaccination-records` (Medical staff)
+- `POST /vaccination-records/retrospective` (Medical staff)
+- `GET /citizens/me` (Citizen)
 
 ## Important Design Highlights
 
