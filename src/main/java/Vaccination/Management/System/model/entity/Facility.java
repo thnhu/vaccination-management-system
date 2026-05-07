@@ -33,11 +33,13 @@ public class Facility {
     @Column(nullable = false, length = 255)
     private String address;
 
-    @Column(name = "province_code", nullable = false, length = 10)
-    private String provinceCode;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "province_code", nullable = false)
+    private AdministrativeUnit province;
 
-    @Column(name = "district_code", length = 10)
-    private String districtCode;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ward_code")
+    private AdministrativeUnit ward;
 
     @Column(length = 15)
     private String phone;
