@@ -54,7 +54,7 @@ public class Vaccine {
 
     @Builder.Default
     @Column(name = "active")
-    private Boolean active = true;
+    private boolean active = true;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -71,4 +71,5 @@ public class Vaccine {
     @LastModifiedDate
     @Column(name = "updated_at", columnDefinition = "DATETIME2")
     private LocalDateTime updatedAt;
+
 }

@@ -42,7 +42,7 @@ public class VaccineServiceImp implements VaccineService {
                 .countryOfOrigin(vaccine.getCountryOfOrigin())
                 .requiredDoses(vaccine.getRequiredDoses())
                 .category(vaccine.getCategory())
-//                .active(vaccine.isActive())
+                .active(vaccine.isActive())
                 .build();
     }
 
@@ -55,7 +55,7 @@ public class VaccineServiceImp implements VaccineService {
                 .requiredDoses(vaccine.getRequiredDoses())
                 .daysBetweenDoses(vaccine.getDaysBetweenDoses())
                 .category(vaccine.getCategory())
-//                .active(vaccine.isActive())
+                .active(vaccine.isActive())
                 .createdAt(vaccine.getCreatedAt())
                 .updatedAt(vaccine.getUpdatedAt())
                 .build();
