@@ -50,7 +50,7 @@ public class Facility {
 
     @Builder.Default
     @Column(name = "active")
-    private Boolean active = true;
+    private boolean active = true;
 
     @Version
     @Column(name = "version")

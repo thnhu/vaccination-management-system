@@ -32,6 +32,7 @@ public enum ErrorCode {
     APPOINTMENT_SLOT_FULL(4002, "No available slots on this date", HttpStatus.BAD_REQUEST),
     APPOINTMENT_DUPLICATE(4003, "Pending appointment already exists for this vaccine", HttpStatus.CONFLICT),
     APPOINTMENT_DOSE_INTERVAL(4004, "Dose interval not met", HttpStatus.BAD_REQUEST),
+    APPOINTMENT_INVALID_STATUS(4005, "Appointment cannot be confirmed in current status", HttpStatus.BAD_REQUEST),
 
     // Vaccination Record
     RECORD_NOT_FOUND(5001, "Vaccination record not found", HttpStatus.NOT_FOUND),
