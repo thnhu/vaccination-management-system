@@ -17,6 +17,7 @@ public enum ErrorCode {
     INVALID_CREDENTIALS(1003, "Invalid phone or password", HttpStatus.UNAUTHORIZED),
     INVALID_PASSWORD(1004, "Password must be at least 8 characters", HttpStatus.BAD_REQUEST),
     INVALID_PHONE(1005, "Phone must be 10-15 digits", HttpStatus.BAD_REQUEST),
+    ACCESS_DENIED(1006, "Access denied", HttpStatus.FORBIDDEN),
 
     // Vaccine
     VACCINE_NOT_FOUND(2001, "Vaccine not found", HttpStatus.NOT_FOUND),
@@ -32,6 +33,7 @@ public enum ErrorCode {
     APPOINTMENT_SLOT_FULL(4002, "No available slots on this date", HttpStatus.BAD_REQUEST),
     APPOINTMENT_DUPLICATE(4003, "Pending appointment already exists for this vaccine", HttpStatus.CONFLICT),
     APPOINTMENT_DOSE_INTERVAL(4004, "Dose interval not met", HttpStatus.BAD_REQUEST),
+    APPOINTMENT_INVALID_STATUS(4005, "Appointment cannot be confirmed in current status", HttpStatus.BAD_REQUEST),
 
     // Vaccination Record
     RECORD_NOT_FOUND(5001, "Vaccination record not found", HttpStatus.NOT_FOUND),

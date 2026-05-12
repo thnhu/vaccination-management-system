@@ -39,7 +39,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/facilities/**").permitAll()
                         .requestMatchers("/citizens/me").hasRole("CITIZEN")
                         .requestMatchers("/vaccination-records/**").hasRole("MEDICAL_STAFF")
+                        .requestMatchers(HttpMethod.POST, "/vaccination-records/**").hasRole("MEDICAL_STAFF")
+                        .requestMatchers(HttpMethod.GET,  "/citizens/*/vaccination-records").hasAnyRole("CITIZEN", "MEDICAL_STAFF")
                         .requestMatchers("/appointments/today").hasRole("MEDICAL_STAFF")
+                        .requestMatchers(HttpMethod.POST, "/appointments").hasRole("CITIZEN")
+                        .requestMatchers(HttpMethod.GET,  "/appointments/my").hasRole("CITIZEN")
+                        .requestMatchers(HttpMethod.PATCH, "/appointments/*/confirm").hasRole("MEDICAL_STAFF")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

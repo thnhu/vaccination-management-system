@@ -41,7 +41,7 @@ public class User {
 
     @Builder.Default
     @Column(name = "active")
-    private Boolean active = true;
+    private boolean active = true;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false, columnDefinition = "DATETIME2")

@@ -7,7 +7,10 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "vaccine")
@@ -32,6 +35,9 @@ public class Vaccine {
     @Column(nullable = false, length = 100)
     private String manufacturer;
 
+    @Column(name = "country_of_origin", length = 100)
+    private String countryOfOrigin;
+
     @Builder.Default
     @Column(name = "required_doses", nullable = false)
     private Integer requiredDoses = 1;
@@ -43,9 +49,20 @@ public class Vaccine {
     @Column(name = "category", length = 20, nullable = false)
     private VaccineCategory category;
 
+    @Column(name = "price", nullable = false, precision = 15, scale = 0)
+    private BigDecimal price;
+
     @Builder.Default
     @Column(name = "active")
-    private Boolean active = true;
+    private boolean active = true;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "vaccine_disease",
+            joinColumns = @JoinColumn(name = "vaccine_id"),
+            inverseJoinColumns = @JoinColumn(name = "disease_id")
+    )
+    private Set<Disease> diseases = new HashSet<>();
 
     @CreatedDate
     @Column(name = "created_at", updatable = false, columnDefinition = "DATETIME2")
@@ -54,4 +71,5 @@ public class Vaccine {
     @LastModifiedDate
     @Column(name = "updated_at", columnDefinition = "DATETIME2")
     private LocalDateTime updatedAt;
+
 }
