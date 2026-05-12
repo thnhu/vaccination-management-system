@@ -6,9 +6,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface VaccinationRecordRepository extends JpaRepository<VaccinationRecord, Long> {
+    List<VaccinationRecord> findByCitizenId(Long citizenId);
 
     @Query("""
             SELECT CAST(MAX(vr.administeredAt) AS localdate)
@@ -19,4 +21,6 @@ public interface VaccinationRecordRepository extends JpaRepository<VaccinationRe
             """)
     Optional<LocalDate> findLatestDoseDate(@Param("citizenId") Long citizenId,
                                            @Param("vaccineId") Long vaccineId);
+
+
 }

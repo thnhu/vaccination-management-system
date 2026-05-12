@@ -86,7 +86,7 @@ public class VaccinationRecord {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean verified = false;
+    private boolean verified = false;
 
     @CreatedBy
     @Column(name = "created_by", nullable = false, updatable = false)
