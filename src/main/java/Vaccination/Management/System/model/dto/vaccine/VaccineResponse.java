@@ -1,12 +1,11 @@
 package Vaccination.Management.System.model.dto.vaccine;
 
-import Vaccination.Management.System.model.entity.Disease;
 import Vaccination.Management.System.model.enums.VaccineCategory;
 import lombok.Builder;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -14,15 +13,24 @@ import java.util.Set;
 public class VaccineResponse {
     private Long id;
     private String name;
-    private String scientificName;
-    private String manufacturer;
-    private String countryOfOrigin;
-    private Integer requiredDoses;
-    private Integer daysBetweenDoses;
     private VaccineCategory category;
-    private BigDecimal price;
     private boolean active;
-    private Set<Disease> diseases;
+    private List<DoseScheduleInfo> doseSchedules;
+    private Set<DiseaseInfo> diseases;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    @Data
+    @Builder
+    public static class DoseScheduleInfo {
+        private Integer doseNumber;
+        private Integer daysAfterPrevious;
+    }
+
+    @Data
+    @Builder
+    public static class DiseaseInfo {
+        private Long id;
+        private String name;
+    }
 }

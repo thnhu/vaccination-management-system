@@ -35,3 +35,6 @@ build/
 *.class
 .idea/
 application.properties
+
+claude.md
+erd.md

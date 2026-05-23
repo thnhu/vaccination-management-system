@@ -6,6 +6,7 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -39,6 +40,7 @@ public class VaccineBatch {
     @Column(nullable = false)
     private Integer quantity;
 
+    // Cached value — authoritative source is COUNT of VALID vaccination_records referencing this batch
     @Column(nullable = false)
     private Integer remaining;
 
@@ -53,11 +55,26 @@ public class VaccineBatch {
     @Column(length = 20)
     private BatchStatus status = BatchStatus.ACTIVE;
 
-    @Column(name = "supplied_by", length = 200)
-    private String suppliedBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manufacturer_id")
+    private Manufacturer manufacturer;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id")
+    private Supplier supplier;
+
+    @Column(name = "price", precision = 15, scale = 0)
+    private BigDecimal price;
 
     @Column(name = "received_date", nullable = false)
     private LocalDate receivedDate;
+
+    @Column(name = "recalled_at", columnDefinition = "DATETIME2")
+    private LocalDateTime recalledAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recalled_by")
+    private User recalledBy;
 
     @CreatedDate
     @Column(name = "imported_at", updatable = false, columnDefinition = "DATETIME2")

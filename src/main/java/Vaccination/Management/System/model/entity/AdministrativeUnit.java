@@ -1,5 +1,6 @@
 package Vaccination.Management.System.model.entity;
 
+import Vaccination.Management.System.model.enums.AdministrativeUnitType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,14 +20,11 @@ public class AdministrativeUnit {
     @Column(nullable = false, length = 100)
     private String name;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
-    private String type; // PROVINCE | WARD
+    private AdministrativeUnitType type;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_code")
     private AdministrativeUnit parent;
-
-    @Builder.Default
-    @Column(name = "active")
-    private Boolean active = true;
 }

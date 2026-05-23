@@ -46,8 +46,9 @@ public class Appointment {
     @Builder.Default
     private AppointmentStatus status = AppointmentStatus.PENDING;
 
-    @Column(name = "cancel_reason", length = 255)
-    private String cancelReason;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "confirmed_by")
+    private User confirmedBy;
 
     @Column(name = "confirmed_at")
     private LocalDateTime confirmedAt;

@@ -1,7 +1,6 @@
 package Vaccination.Management.System.model.entity;
 
 import Vaccination.Management.System.model.enums.DataSource;
-import Vaccination.Management.System.model.enums.ReactionLevel;
 import Vaccination.Management.System.model.enums.RecordStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -56,14 +55,6 @@ public class VaccinationRecord {
     private User administeredBy;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "reaction_level", length = 10)
-    @Builder.Default
-    private ReactionLevel reactionLevel = ReactionLevel.NONE;
-
-    @Column(name = "reaction_note", length = 500)
-    private String reactionNote;
-
-    @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 10)
     @Builder.Default
     private RecordStatus status = RecordStatus.VALID;
@@ -76,17 +67,20 @@ public class VaccinationRecord {
     private String invalidatedReason;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "corrected_by_record_id")
-    private VaccinationRecord correctedByRecord;
+    @JoinColumn(name = "replaces_record_id", updatable = false)
+    private VaccinationRecord replacesRecord;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "data_source", nullable = true, length = 20, updatable = false)
     @Builder.Default
     private DataSource dataSource = DataSource.SYSTEM;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private boolean verified = false;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "verified_by")
+    private User verifiedBy;
+
+    @Column(name = "verified_at")
+    private LocalDateTime verifiedAt;
 
     @CreatedBy
     @Column(name = "created_by", nullable = false, updatable = false)

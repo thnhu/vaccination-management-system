@@ -22,4 +22,20 @@ public class Disease {
     @Size(max = 200)
     @Column(nullable = false, unique = true, length = 200)
     private String name;
+
+    @Size(max = 200)
+    @Column(name = "scientific_name", length = 200)
+    private String scientificName;
+
+    @Size(max = 10)
+    @Column(name = "icd10_code", unique = true, length = 10)
+    private String icd10Code;
+
+    @Size(max = 500)
+    @Column(length = 500)
+    private String description;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean active = true;
 }

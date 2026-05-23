@@ -19,7 +19,8 @@ public class AppointmentResponse {
     private String facilityName;
     private LocalDate preferredDate;
     private AppointmentStatus status;
-    private String cancelReason;
+    private Long confirmedById;
+    private String confirmedByName;
     private LocalDateTime confirmedAt;
     private LocalDateTime createdAt;
 }
