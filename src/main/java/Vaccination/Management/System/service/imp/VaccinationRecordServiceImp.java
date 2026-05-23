@@ -46,8 +46,15 @@ public class VaccinationRecordServiceImp implements VaccinationRecordService {
             throw new AppException(ErrorCode.BATCH_DEPLETED);
         }
 
+        // Validate batch vaccine matches appointment vaccine
+        if (!batch.getVaccine().getId().equals(appointment.getVaccine().getId())) {
+            throw new AppException(ErrorCode.RECORD_APPOINTMENT_MISMATCH);
+        }
+
         User staff = userRepository.findById(staffId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        LocalDateTime now = LocalDateTime.now();
 
         VaccinationRecord record = VaccinationRecord.builder()
                 .appointment(appointment)
@@ -56,14 +63,12 @@ public class VaccinationRecordServiceImp implements VaccinationRecordService {
                 .facility(appointment.getFacility())
                 .batch(batch)
                 .doseNumber(request.getDoseNumber())
-                .administeredAt(LocalDateTime.now())
+                .administeredAt(now)
                 .administeredBy(staff)
-                .reactionLevel(ReactionLevel.NONE)
-                .reactionNote(request.getReactionNote())
                 .status(RecordStatus.VALID)
                 .dataSource(DataSource.SYSTEM)
-                .verified(true)
-                .createdBy(staffId)
+                .verifiedBy(staff)
+                .verifiedAt(now)
                 .build();
 
         vaccinationRecordRepository.save(record);
@@ -75,7 +80,6 @@ public class VaccinationRecordServiceImp implements VaccinationRecordService {
         vaccineBatchRepository.save(batch);
 
         appointment.setStatus(AppointmentStatus.COMPLETED);
-        appointment.setUpdatedBy(staffId);
         appointmentRepository.save(appointment);
 
         return toResponse(record);
@@ -95,6 +99,25 @@ public class VaccinationRecordServiceImp implements VaccinationRecordService {
                 .toList();
     }
 
+    @Override
+    @Transactional
+    public VaccinationRecordResponse verifyRecord(Long recordId, Long staffId) {
+        VaccinationRecord record = vaccinationRecordRepository.findById(recordId)
+                .orElseThrow(() -> new AppException(ErrorCode.RECORD_NOT_FOUND));
+
+        if (record.getVerifiedBy() != null) {
+            throw new AppException(ErrorCode.RECORD_ALREADY_VERIFIED);
+        }
+
+        User staff = userRepository.findById(staffId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        record.setVerifiedBy(staff);
+        record.setVerifiedAt(LocalDateTime.now());
+
+        return toResponse(vaccinationRecordRepository.save(record));
+    }
+
     // --- Mapper ---
 
     private VaccinationRecordResponse toResponse(VaccinationRecord r) {
@@ -110,11 +133,12 @@ public class VaccinationRecordServiceImp implements VaccinationRecordService {
                 .doseNumber(r.getDoseNumber())
                 .administeredAt(r.getAdministeredAt())
                 .administeredByName(r.getAdministeredBy().getFullName())
-                .reactionLevel(r.getReactionLevel())
-                .reactionNote(r.getReactionNote())
                 .status(r.getStatus())
+                .replacesRecordId(r.getReplacesRecord() != null ? r.getReplacesRecord().getId() : null)
                 .dataSource(r.getDataSource())
-                .verified(r.isVerified())
+                .verifiedById(r.getVerifiedBy() != null ? r.getVerifiedBy().getId() : null)
+                .verifiedByName(r.getVerifiedBy() != null ? r.getVerifiedBy().getFullName() : null)
+                .verifiedAt(r.getVerifiedAt())
                 .createdAt(r.getCreatedAt())
                 .build();
     }

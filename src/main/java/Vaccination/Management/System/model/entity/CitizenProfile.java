@@ -37,6 +37,11 @@ public class CitizenProfile {
     @Column(length = 255)
     private String address;
 
-    @Column(length = 100)
-    private String province;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "province_code", nullable = false)
+    private AdministrativeUnit province;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ward_code")
+    private AdministrativeUnit ward;
 }

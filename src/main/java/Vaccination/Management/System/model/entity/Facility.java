@@ -45,16 +45,8 @@ public class Facility {
     private String phone;
 
     @Builder.Default
-    @Column(name = "max_slots_per_day", nullable = false)
-    private Integer maxSlotsPerDay = 50;
-
-    @Builder.Default
     @Column(name = "active")
     private boolean active = true;
-
-    @Version
-    @Column(name = "version")
-    private Integer version;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)

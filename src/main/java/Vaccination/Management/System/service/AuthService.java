@@ -49,7 +49,7 @@ public class AuthService {
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);
         }
         User user = userRepository.findByPhone(request.getPhone())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS));
         String token = jwtUtil.generateToken(user.getPhone(), user.getRole().name());
         return new LoginResponse(token, user.getRole().name());
     }

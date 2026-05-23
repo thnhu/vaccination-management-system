@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,23 +41,34 @@ public class VaccineServiceImp implements VaccineService {
         return VaccineSummary.builder()
                 .id(vaccine.getId())
                 .name(vaccine.getName())
-                .countryOfOrigin(vaccine.getCountryOfOrigin())
-                .requiredDoses(vaccine.getRequiredDoses())
                 .category(vaccine.getCategory())
+                .totalDoses(vaccine.getDoseSchedules().size())
                 .active(vaccine.isActive())
                 .build();
     }
 
     private VaccineResponse toResponse(Vaccine vaccine) {
+        List<VaccineResponse.DoseScheduleInfo> schedules = vaccine.getDoseSchedules().stream()
+                .map(s -> VaccineResponse.DoseScheduleInfo.builder()
+                        .doseNumber(s.getDoseNumber())
+                        .daysAfterPrevious(s.getDaysAfterPrevious())
+                        .build())
+                .toList();
+
+        Set<VaccineResponse.DiseaseInfo> diseases = vaccine.getVaccineDiseases().stream()
+                .map(vd -> VaccineResponse.DiseaseInfo.builder()
+                        .id(vd.getDisease().getId())
+                        .name(vd.getDisease().getName())
+                        .build())
+                .collect(Collectors.toSet());
+
         return VaccineResponse.builder()
                 .id(vaccine.getId())
                 .name(vaccine.getName())
-                .scientificName(vaccine.getScientificName())
-                .manufacturer(vaccine.getManufacturer())
-                .requiredDoses(vaccine.getRequiredDoses())
-                .daysBetweenDoses(vaccine.getDaysBetweenDoses())
                 .category(vaccine.getCategory())
                 .active(vaccine.isActive())
+                .doseSchedules(schedules)
+                .diseases(diseases)
                 .createdAt(vaccine.getCreatedAt())
                 .updatedAt(vaccine.getUpdatedAt())
                 .build();

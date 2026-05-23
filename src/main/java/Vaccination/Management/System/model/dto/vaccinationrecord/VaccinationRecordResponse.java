@@ -1,7 +1,6 @@
 package Vaccination.Management.System.model.dto.vaccinationrecord;
 
 import Vaccination.Management.System.model.enums.DataSource;
-import Vaccination.Management.System.model.enums.ReactionLevel;
 import Vaccination.Management.System.model.enums.RecordStatus;
 import lombok.Builder;
 import lombok.Data;
@@ -22,10 +21,11 @@ public class VaccinationRecordResponse {
     private Integer doseNumber;
     private LocalDateTime administeredAt;
     private String administeredByName;
-    private ReactionLevel reactionLevel;
-    private String reactionNote;
     private RecordStatus status;
+    private Long replacesRecordId;
     private DataSource dataSource;
-    private boolean verified;
+    private Long verifiedById;
+    private String verifiedByName;
+    private LocalDateTime verifiedAt;
     private LocalDateTime createdAt;
 }

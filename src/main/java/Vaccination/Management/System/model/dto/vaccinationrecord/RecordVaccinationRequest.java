@@ -14,6 +14,4 @@ public class RecordVaccinationRequest {
 
     @NotNull
     private Integer doseNumber;
-
-    private String reactionNote;
 }
