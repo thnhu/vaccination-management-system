@@ -2,6 +2,7 @@ package Vaccination.Management.System.model.entity;
 
 import Vaccination.Management.System.model.enums.VaccineCategory;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Nationalized;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -27,6 +28,7 @@ public class Vaccine {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Nationalized
     @Column(nullable = false, unique = true, length = 100)
     private String name;
 

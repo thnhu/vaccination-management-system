@@ -3,6 +3,7 @@ package Vaccination.Management.System.model.entity;
 import Vaccination.Management.System.model.enums.Gender;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Nationalized;
 import java.time.LocalDate;
 
 @Entity
@@ -34,6 +35,7 @@ public class CitizenProfile {
     @Column(length = 10)
     private Gender gender;
 
+    @Nationalized
     @Column(length = 255)
     private String address;
 

@@ -2,6 +2,7 @@ package Vaccination.Management.System.model.entity;
 
 import Vaccination.Management.System.model.enums.FacilityType;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Nationalized;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -23,6 +24,7 @@ public class Facility {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Nationalized
     @Column(nullable = false, length = 200)
     private String name;
 
@@ -30,6 +32,7 @@ public class Facility {
     @Column(name = "facility_type", nullable = false, length = 20)
     private FacilityType facilityType;
 
+    @Nationalized
     @Column(nullable = false, length = 255)
     private String address;
 

@@ -2,6 +2,7 @@ package Vaccination.Management.System.model.entity;
 
 import Vaccination.Management.System.model.enums.AdministrativeUnitType;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Nationalized;
 import lombok.*;
 
 @Entity
@@ -17,6 +18,7 @@ public class AdministrativeUnit {
     @Column(length = 10)
     private String code;
 
+    @Nationalized
     @Column(nullable = false, length = 100)
     private String name;
 

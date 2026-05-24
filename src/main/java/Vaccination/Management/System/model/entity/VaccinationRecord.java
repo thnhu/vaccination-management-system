@@ -3,6 +3,7 @@ package Vaccination.Management.System.model.entity;
 import Vaccination.Management.System.model.enums.DataSource;
 import Vaccination.Management.System.model.enums.RecordStatus;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Nationalized;
 import lombok.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -63,6 +64,7 @@ public class VaccinationRecord {
     @JoinColumn(name = "invalidated_by")
     private User invalidatedBy;
 
+    @Nationalized
     @Column(name = "invalidated_reason", length = 255)
     private String invalidatedReason;
 
