@@ -2,6 +2,7 @@ package Vaccination.Management.System.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Nationalized;
 
 @Entity
 @Table(name = "medical_staff_profile")
@@ -19,6 +20,7 @@ public class MedicalStaffProfile {
     @Column(name = "staff_code", nullable = false, unique = true, length = 20)
     private String staffCode;
 
+    @Nationalized
     @Column(name = "specialization", length = 100)
     private String specialization;
 

@@ -2,6 +2,7 @@ package Vaccination.Management.System.model.entity;
 
 import Vaccination.Management.System.model.enums.UserRole;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Nationalized;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -36,6 +37,7 @@ public class User {
     @Column(nullable = false, length = 20)
     private UserRole role;
 
+    @Nationalized
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
