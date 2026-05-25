@@ -40,6 +40,7 @@ public enum ErrorCode {
     APPOINTMENT_DOSE_INTERVAL(4004, "Dose interval not met", HttpStatus.BAD_REQUEST),
     APPOINTMENT_INVALID_STATUS(4005, "Action not allowed for appointment in current status", HttpStatus.BAD_REQUEST),
     CITIZEN_ROLE_REQUIRED(4006, "The specified user does not have CITIZEN role", HttpStatus.BAD_REQUEST),
+    VACCINATION_SERIES_COMPLETED(4007, "Citizen has already completed the full vaccination series for this vaccine", HttpStatus.BAD_REQUEST),
 
     // Vaccination Record
     RECORD_NOT_FOUND(5001, "Vaccination record not found", HttpStatus.NOT_FOUND),

@@ -21,6 +21,7 @@ public class VaccinationRecordServiceImp implements VaccinationRecordService {
 
     private final VaccinationRecordRepository vaccinationRecordRepository;
     private final AppointmentRepository appointmentRepository;
+    private final AppointmentStatusHistoryRepository appointmentStatusHistoryRepository;
     private final VaccineBatchRepository vaccineBatchRepository;
     private final UserRepository userRepository;
 
@@ -54,21 +55,15 @@ public class VaccinationRecordServiceImp implements VaccinationRecordService {
         User staff = userRepository.findById(staffId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        LocalDateTime now = LocalDateTime.now();
-
         VaccinationRecord record = VaccinationRecord.builder()
                 .appointment(appointment)
                 .citizen(appointment.getCitizen())
                 .vaccine(appointment.getVaccine())
                 .facility(appointment.getFacility())
                 .batch(batch)
-                .doseNumber(request.getDoseNumber())
-                .administeredAt(now)
-                .administeredBy(staff)
+                .doseSchedule(appointment.getDoseSchedule())
+                .administeredAt(LocalDateTime.now())
                 .status(RecordStatus.VALID)
-                .dataSource(DataSource.SYSTEM)
-                .verifiedBy(staff)
-                .verifiedAt(now)
                 .build();
 
         vaccinationRecordRepository.save(record);
@@ -79,8 +74,19 @@ public class VaccinationRecordServiceImp implements VaccinationRecordService {
         }
         vaccineBatchRepository.save(batch);
 
-        appointment.setStatus(AppointmentStatus.COMPLETED);
+        AppointmentStatus previousStatus = appointment.getStatus();
+        appointment.setStatus(AppointmentStatus.VACCINATED);
         appointmentRepository.save(appointment);
+
+        appointmentStatusHistoryRepository.save(
+                AppointmentStatusHistory.builder()
+                        .appointment(appointment)
+                        .fromStatus(previousStatus)
+                        .toStatus(AppointmentStatus.VACCINATED)
+                        .reason(null)
+                        .changedBy(staff)
+                        .build()
+        );
 
         return toResponse(record);
     }
@@ -99,25 +105,6 @@ public class VaccinationRecordServiceImp implements VaccinationRecordService {
                 .toList();
     }
 
-    @Override
-    @Transactional
-    public VaccinationRecordResponse verifyRecord(Long recordId, Long staffId) {
-        VaccinationRecord record = vaccinationRecordRepository.findById(recordId)
-                .orElseThrow(() -> new AppException(ErrorCode.RECORD_NOT_FOUND));
-
-        if (record.getVerifiedBy() != null) {
-            throw new AppException(ErrorCode.RECORD_ALREADY_VERIFIED);
-        }
-
-        User staff = userRepository.findById(staffId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-
-        record.setVerifiedBy(staff);
-        record.setVerifiedAt(LocalDateTime.now());
-
-        return toResponse(vaccinationRecordRepository.save(record));
-    }
-
     // --- Mapper ---
 
     private VaccinationRecordResponse toResponse(VaccinationRecord r) {
@@ -130,15 +117,11 @@ public class VaccinationRecordServiceImp implements VaccinationRecordService {
                 .facilityId(r.getFacility().getId())
                 .facilityName(r.getFacility().getName())
                 .batchNumber(r.getBatch().getBatchNumber())
-                .doseNumber(r.getDoseNumber())
+                .doseNumber(r.getDoseSchedule().getDoseNumber())
                 .administeredAt(r.getAdministeredAt())
-                .administeredByName(r.getAdministeredBy().getFullName())
                 .status(r.getStatus())
+                .correctionReason(r.getCorrectionReason())
                 .replacesRecordId(r.getReplacesRecord() != null ? r.getReplacesRecord().getId() : null)
-                .dataSource(r.getDataSource())
-                .verifiedById(r.getVerifiedBy() != null ? r.getVerifiedBy().getId() : null)
-                .verifiedByName(r.getVerifiedBy() != null ? r.getVerifiedBy().getFullName() : null)
-                .verifiedAt(r.getVerifiedAt())
                 .createdAt(r.getCreatedAt())
                 .build();
     }

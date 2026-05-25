@@ -1,6 +1,5 @@
 package Vaccination.Management.System.model.entity;
 
-import Vaccination.Management.System.model.enums.DataSource;
 import Vaccination.Management.System.model.enums.RecordStatus;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Nationalized;
@@ -45,44 +44,25 @@ public class VaccinationRecord {
     @JoinColumn(name = "batch_id", updatable = false)
     private VaccineBatch batch;
 
-    @Column(name = "dose_number", nullable = false, updatable = false)
-    private Integer doseNumber;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dose_schedule_id", nullable = false, updatable = false)
+    private VaccineDoseSchedule doseSchedule;
 
     @Column(name = "administered_at", updatable = false)
     private LocalDateTime administeredAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "administered_by", updatable = false)
-    private User administeredBy;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 10)
     @Builder.Default
     private RecordStatus status = RecordStatus.VALID;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invalidated_by")
-    private User invalidatedBy;
-
     @Nationalized
-    @Column(name = "invalidated_reason", length = 255)
-    private String invalidatedReason;
+    @Column(name = "correction_reason", length = 255, updatable = false)
+    private String correctionReason;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "replaces_record_id", updatable = false)
     private VaccinationRecord replacesRecord;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "data_source", nullable = true, length = 20, updatable = false)
-    @Builder.Default
-    private DataSource dataSource = DataSource.SYSTEM;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "verified_by")
-    private User verifiedBy;
-
-    @Column(name = "verified_at")
-    private LocalDateTime verifiedAt;
 
     @CreatedBy
     @Column(name = "created_by", nullable = false, updatable = false)

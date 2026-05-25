@@ -11,7 +11,4 @@ public class RecordVaccinationRequest {
 
     @NotNull(message = "BATCH_NOT_FOUND")
     private Long batchId;
-
-    @NotNull
-    private Integer doseNumber;
 }

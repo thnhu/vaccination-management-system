@@ -67,6 +67,7 @@ public class VaccineServiceImp implements VaccineService {
                 .name(vaccine.getName())
                 .category(vaccine.getCategory())
                 .active(vaccine.isActive())
+                .totalDoses(vaccine.getDoseSchedules().size())
                 .doseSchedules(schedules)
                 .diseases(diseases)
                 .createdAt(vaccine.getCreatedAt())

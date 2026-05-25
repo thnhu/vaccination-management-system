@@ -15,6 +15,7 @@ public class VaccineResponse {
     private String name;
     private VaccineCategory category;
     private boolean active;
+    private Integer totalDoses;
     private List<DoseScheduleInfo> doseSchedules;
     private Set<DiseaseInfo> diseases;
     private LocalDateTime createdAt;

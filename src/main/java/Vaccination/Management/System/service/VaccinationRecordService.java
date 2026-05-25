@@ -8,5 +8,4 @@ import java.util.List;
 public interface VaccinationRecordService {
     VaccinationRecordResponse recordVaccination(RecordVaccinationRequest request, Long staffId);
     List<VaccinationRecordResponse> getVaccinationRecords(Long citizenId, Long requesterId, String requesterRole);
-    VaccinationRecordResponse verifyRecord(Long recordId, Long staffId);
 }
