@@ -3,9 +3,7 @@ package Vaccination.Management.System.model.entity;
 import Vaccination.Management.System.model.enums.AppointmentStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -38,6 +36,10 @@ public class Appointment {
     @JoinColumn(name = "facility_id", nullable = false)
     private Facility facility;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dose_schedule_id", nullable = false)
+    private VaccineDoseSchedule doseSchedule;
+
     @Column(name = "preferred_date", nullable = false)
     private LocalDate preferredDate;
 
@@ -46,23 +48,8 @@ public class Appointment {
     @Builder.Default
     private AppointmentStatus status = AppointmentStatus.PENDING;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "confirmed_by")
-    private User confirmedBy;
-
-    @Column(name = "confirmed_at")
-    private LocalDateTime confirmedAt;
-
     @Column(name = "expired_at")
     private LocalDateTime expiredAt;
-
-    @CreatedBy
-    @Column(name = "created_by", updatable = false)
-    private Long createdBy;
-
-    @LastModifiedBy
-    @Column(name = "updated_by")
-    private Long updatedBy;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)

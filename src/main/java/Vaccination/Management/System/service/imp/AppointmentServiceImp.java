@@ -11,6 +11,8 @@ import Vaccination.Management.System.model.entity.Facility;
 import Vaccination.Management.System.model.entity.FacilityCapacity;
 import Vaccination.Management.System.model.entity.User;
 import Vaccination.Management.System.model.entity.Vaccine;
+import Vaccination.Management.System.model.entity.VaccineDoseSchedule;
+import Vaccination.Management.System.model.entity.VaccinationRecord;
 import Vaccination.Management.System.model.enums.AppointmentStatus;
 import Vaccination.Management.System.model.enums.RecordStatus;
 import Vaccination.Management.System.model.enums.UserRole;
@@ -20,6 +22,7 @@ import Vaccination.Management.System.repository.FacilityCapacityRepository;
 import Vaccination.Management.System.repository.FacilityRepository;
 import Vaccination.Management.System.repository.UserRepository;
 import Vaccination.Management.System.repository.VaccinationRecordRepository;
+import Vaccination.Management.System.repository.VaccineDoseScheduleRepository;
 import Vaccination.Management.System.repository.VaccineRepository;
 import Vaccination.Management.System.service.AppointmentService;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +30,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +43,7 @@ public class AppointmentServiceImp implements AppointmentService {
     private final FacilityRepository facilityRepository;
     private final FacilityCapacityRepository facilityCapacityRepository;
     private final VaccinationRecordRepository vaccinationRecordRepository;
+    private final VaccineDoseScheduleRepository vaccineDoseScheduleRepository;
     private final UserRepository userRepository;
 
     @Override
@@ -87,29 +91,33 @@ public class AppointmentServiceImp implements AppointmentService {
             throw new AppException(ErrorCode.APPOINTMENT_DUPLICATE);
         }
 
-        vaccinationRecordRepository
+        Optional<VaccinationRecord> lastRecord = vaccinationRecordRepository
                 .findFirstByCitizenIdAndVaccineIdAndStatusOrderByAdministeredAtDesc(
-                        citizenId, request.getVaccineId(), RecordStatus.VALID)
-                .ifPresent(lastRecord -> {
-                    int nextDoseNumber = lastRecord.getDoseNumber() + 1;
-                    LocalDate lastDate = lastRecord.getAdministeredAt().toLocalDate();
-                    vaccine.getDoseSchedules().stream()
-                            .filter(s -> s.getDoseNumber().equals(nextDoseNumber))
-                            .findFirst()
-                            .ifPresent(schedule -> {
-                                if (schedule.getDaysAfterPrevious() != null) {
-                                    LocalDate earliest = lastDate.plusDays(schedule.getDaysAfterPrevious());
-                                    if (request.getPreferredDate().isBefore(earliest)) {
-                                        throw new AppException(ErrorCode.APPOINTMENT_DOSE_INTERVAL);
-                                    }
-                                }
-                            });
-                });
+                        citizenId, request.getVaccineId(), RecordStatus.VALID);
+
+        int nextDoseNumber = lastRecord
+                .map(r -> r.getDoseSchedule().getDoseNumber() + 1)
+                .orElse(1);
+
+        VaccineDoseSchedule nextSchedule = vaccineDoseScheduleRepository
+                .findByVaccineIdAndDoseNumber(request.getVaccineId(), nextDoseNumber)
+                .orElseThrow(() -> new AppException(ErrorCode.VACCINATION_SERIES_COMPLETED));
+
+        lastRecord.ifPresent(r -> {
+            if (nextSchedule.getDaysAfterPrevious() != null) {
+                LocalDate lastDate = r.getAdministeredAt().toLocalDate();
+                LocalDate earliest = lastDate.plusDays(nextSchedule.getDaysAfterPrevious());
+                if (request.getPreferredDate().isBefore(earliest)) {
+                    throw new AppException(ErrorCode.APPOINTMENT_DOSE_INTERVAL);
+                }
+            }
+        });
 
         Appointment appointment = Appointment.builder()
                 .citizen(citizen)
                 .vaccine(vaccine)
                 .facility(facility)
+                .doseSchedule(nextSchedule)
                 .preferredDate(request.getPreferredDate())
                 .status(AppointmentStatus.PENDING)
                 .build();
@@ -143,8 +151,6 @@ public class AppointmentServiceImp implements AppointmentService {
 
         AppointmentStatus previous = appointment.getStatus();
         appointment.setStatus(AppointmentStatus.CONFIRMED);
-        appointment.setConfirmedBy(staff);
-        appointment.setConfirmedAt(LocalDateTime.now());
 
         appointment = appointmentRepository.save(appointment);
         recordHistory(appointment, previous, AppointmentStatus.CONFIRMED, null, staff);
@@ -235,6 +241,10 @@ public class AppointmentServiceImp implements AppointmentService {
     }
 
     private AppointmentResponse toResponse(Appointment a) {
+        AppointmentStatusHistory confirmedHistory = statusHistoryRepository
+                .findFirstByAppointmentIdAndToStatus(a.getId(), AppointmentStatus.CONFIRMED)
+                .orElse(null);
+
         return AppointmentResponse.builder()
                 .id(a.getId())
                 .citizenId(a.getCitizen().getId())
@@ -245,9 +255,9 @@ public class AppointmentServiceImp implements AppointmentService {
                 .facilityName(a.getFacility().getName())
                 .preferredDate(a.getPreferredDate())
                 .status(a.getStatus())
-                .confirmedById(a.getConfirmedBy() != null ? a.getConfirmedBy().getId() : null)
-                .confirmedByName(a.getConfirmedBy() != null ? a.getConfirmedBy().getFullName() : null)
-                .confirmedAt(a.getConfirmedAt())
+                .confirmedById(confirmedHistory != null ? confirmedHistory.getChangedBy().getId() : null)
+                .confirmedByName(confirmedHistory != null ? confirmedHistory.getChangedBy().getFullName() : null)
+                .confirmedAt(confirmedHistory != null ? confirmedHistory.getChangedAt() : null)
                 .createdAt(a.getCreatedAt())
                 .build();
     }
