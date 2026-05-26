@@ -2,6 +2,8 @@ package Vaccination.Management.System.service.imp;
 
 import Vaccination.Management.System.exception.AppException;
 import Vaccination.Management.System.exception.ErrorCode;
+import Vaccination.Management.System.model.dto.vaccine.CreateVaccineRequest;
+import Vaccination.Management.System.model.dto.vaccine.UpdateVaccineRequest;
 import Vaccination.Management.System.model.dto.vaccine.VaccineResponse;
 import Vaccination.Management.System.model.dto.vaccine.VaccineSummary;
 import Vaccination.Management.System.model.entity.Vaccine;
@@ -9,6 +11,7 @@ import Vaccination.Management.System.repository.VaccineRepository;
 import Vaccination.Management.System.service.VaccineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -32,6 +35,56 @@ public class VaccineServiceImp implements VaccineService {
     public VaccineResponse getVaccineById(Long id) {
         Vaccine vaccine = vaccineRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.VACCINE_NOT_FOUND));
+        return toResponse(vaccine);
+    }
+
+    @Override
+    @Transactional
+    public VaccineResponse createVaccine(CreateVaccineRequest request) {
+        if (vaccineRepository.existsByName(request.getName())) {
+            throw new AppException(ErrorCode.VACCINE_EXISTED);
+        }
+        Vaccine vaccine = Vaccine.builder()
+                .name(request.getName())
+                .category(request.getCategory())
+                .build();
+        vaccine = vaccineRepository.save(vaccine);
+        return toResponse(vaccine);
+    }
+
+    @Override
+    @Transactional
+    public VaccineResponse updateVaccine(Long id, UpdateVaccineRequest request) {
+        Vaccine vaccine = vaccineRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.VACCINE_NOT_FOUND));
+
+        if (request.getName() != null) {
+            if (vaccineRepository.existsByNameAndIdNot(request.getName(), id)) {
+                throw new AppException(ErrorCode.VACCINE_EXISTED);
+            }
+            vaccine.setName(request.getName());
+        }
+
+        if (request.getCategory() != null) {
+            vaccine.setCategory(request.getCategory());
+        }
+
+        vaccine = vaccineRepository.save(vaccine);
+        return toResponse(vaccine);
+    }
+
+    @Override
+    @Transactional
+    public VaccineResponse deactivateVaccine(Long id) {
+        Vaccine vaccine = vaccineRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.VACCINE_NOT_FOUND));
+
+        if (!vaccine.isActive()) {
+            throw new AppException(ErrorCode.VACCINE_ALREADY_INACTIVE);
+        }
+
+        vaccine.setActive(false);
+        vaccine = vaccineRepository.save(vaccine);
         return toResponse(vaccine);
     }
 

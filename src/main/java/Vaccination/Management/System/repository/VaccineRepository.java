@@ -8,4 +8,6 @@ import java.util.List;
 @Repository
 public interface VaccineRepository extends JpaRepository<Vaccine, Long> {
     List<Vaccine> findAllByActiveTrue();
+    boolean existsByName(String name);
+    boolean existsByNameAndIdNot(String name, Long id);
 }

@@ -13,16 +13,19 @@ public enum ErrorCode {
 
     // Auth
     USER_EXISTED(1001, "Phone number already in use", HttpStatus.CONFLICT),
+    EMAIL_EXISTED(1007, "Email already in use", HttpStatus.CONFLICT),
     USER_NOT_FOUND(1002, "User not found", HttpStatus.NOT_FOUND),
     INVALID_CREDENTIALS(1003, "Invalid phone or password", HttpStatus.UNAUTHORIZED),
     INVALID_PASSWORD(1004, "Password must be at least 8 characters", HttpStatus.BAD_REQUEST),
     INVALID_PHONE(1005, "Phone must be 10-15 digits", HttpStatus.BAD_REQUEST),
     ACCESS_DENIED(1006, "Access denied", HttpStatus.FORBIDDEN),
+    UNAUTHORIZED(1008, "Unauthorized", HttpStatus.UNAUTHORIZED),
 
     // Vaccine
     VACCINE_NOT_FOUND(2001, "Vaccine not found", HttpStatus.NOT_FOUND),
     VACCINE_EXISTED(2002, "Vaccine name already exists", HttpStatus.CONFLICT),
     VACCINE_INACTIVE(2003, "Vaccine is currently inactive", HttpStatus.BAD_REQUEST),
+    VACCINE_ALREADY_INACTIVE(2004, "Vaccine is already inactive", HttpStatus.BAD_REQUEST),
 
     // Administrative Unit
     ADMINISTRATIVE_UNIT_NOT_FOUND(3000, "Administrative unit not found", HttpStatus.NOT_FOUND),
@@ -41,6 +44,9 @@ public enum ErrorCode {
     APPOINTMENT_INVALID_STATUS(4005, "Action not allowed for appointment in current status", HttpStatus.BAD_REQUEST),
     CITIZEN_ROLE_REQUIRED(4006, "The specified user does not have CITIZEN role", HttpStatus.BAD_REQUEST),
     VACCINATION_SERIES_COMPLETED(4007, "Citizen has already completed the full vaccination series for this vaccine", HttpStatus.BAD_REQUEST),
+
+    // Citizen
+    CITIZEN_PROFILE_NOT_FOUND(6001, "Citizen profile not found", HttpStatus.NOT_FOUND),
 
     // Vaccination Record
     RECORD_NOT_FOUND(5001, "Vaccination record not found", HttpStatus.NOT_FOUND),

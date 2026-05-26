@@ -28,6 +28,9 @@ public class AuthService {
         if (userRepository.existsByPhone(request.getPhone())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
+        if (request.getEmail() != null && userRepository.existsByEmail(request.getEmail())) {
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
+        }
         User user = User.builder()
                 .phone(request.getPhone())
                 .password(passwordEncoder.encode(request.getPassword()))
