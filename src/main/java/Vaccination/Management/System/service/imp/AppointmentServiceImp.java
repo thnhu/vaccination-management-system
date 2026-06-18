@@ -3,12 +3,14 @@ package Vaccination.Management.System.service.imp;
 import Vaccination.Management.System.exception.AppException;
 import Vaccination.Management.System.exception.ErrorCode;
 import Vaccination.Management.System.model.dto.appointment.AppointmentResponse;
+import Vaccination.Management.System.model.dto.appointment.AppointmentStatusHistoryResponse;
 import Vaccination.Management.System.model.dto.appointment.AppointmentSummary;
 import Vaccination.Management.System.model.dto.appointment.CreateAppointmentRequest;
 import Vaccination.Management.System.model.entity.Appointment;
 import Vaccination.Management.System.model.entity.AppointmentStatusHistory;
 import Vaccination.Management.System.model.entity.Facility;
 import Vaccination.Management.System.model.entity.FacilityCapacity;
+import Vaccination.Management.System.model.entity.MedicalStaffProfile;
 import Vaccination.Management.System.model.entity.User;
 import Vaccination.Management.System.model.entity.Vaccine;
 import Vaccination.Management.System.model.entity.VaccineDoseSchedule;
@@ -20,6 +22,7 @@ import Vaccination.Management.System.repository.AppointmentRepository;
 import Vaccination.Management.System.repository.AppointmentStatusHistoryRepository;
 import Vaccination.Management.System.repository.FacilityCapacityRepository;
 import Vaccination.Management.System.repository.FacilityRepository;
+import Vaccination.Management.System.repository.MedicalStaffProfileRepository;
 import Vaccination.Management.System.repository.UserRepository;
 import Vaccination.Management.System.repository.VaccinationRecordRepository;
 import Vaccination.Management.System.repository.VaccineDoseScheduleRepository;
@@ -45,6 +48,7 @@ public class AppointmentServiceImp implements AppointmentService {
     private final VaccinationRecordRepository vaccinationRecordRepository;
     private final VaccineDoseScheduleRepository vaccineDoseScheduleRepository;
     private final UserRepository userRepository;
+    private final MedicalStaffProfileRepository medicalStaffProfileRepository;
 
     @Override
     @Transactional
@@ -83,7 +87,7 @@ public class AppointmentServiceImp implements AppointmentService {
             throw new AppException(ErrorCode.APPOINTMENT_SLOT_FULL);
         }
 
-        boolean hasDuplicate = appointmentRepository.existsPendingOrConfirmed(
+        boolean hasDuplicate = appointmentRepository.existsScheduled(
                 citizenId,
                 request.getVaccineId()
         );
@@ -119,11 +123,10 @@ public class AppointmentServiceImp implements AppointmentService {
                 .facility(facility)
                 .doseSchedule(nextSchedule)
                 .preferredDate(request.getPreferredDate())
-                .status(AppointmentStatus.PENDING)
+                .status(AppointmentStatus.SCHEDULED)
                 .build();
 
         appointment = appointmentRepository.save(appointment);
-        recordHistory(appointment, null, AppointmentStatus.PENDING, null, citizen);
 
         return toResponse(appointment);
     }
@@ -138,34 +141,11 @@ public class AppointmentServiceImp implements AppointmentService {
 
     @Override
     @Transactional
-    public AppointmentResponse confirmAppointment(Long appointmentId, Long staffId) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
-
-        if (appointment.getStatus() != AppointmentStatus.PENDING) {
-            throw new AppException(ErrorCode.APPOINTMENT_INVALID_STATUS);
-        }
-
-        User staff = userRepository.findById(staffId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-
-        AppointmentStatus previous = appointment.getStatus();
-        appointment.setStatus(AppointmentStatus.CONFIRMED);
-
-        appointment = appointmentRepository.save(appointment);
-        recordHistory(appointment, previous, AppointmentStatus.CONFIRMED, null, staff);
-
-        return toResponse(appointment);
-    }
-
-    @Override
-    @Transactional
     public AppointmentResponse cancelAppointment(Long appointmentId, Long userId, String reason) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
 
-        if (appointment.getStatus() != AppointmentStatus.PENDING
-                && appointment.getStatus() != AppointmentStatus.CONFIRMED) {
+        if (appointment.getStatus() != AppointmentStatus.SCHEDULED) {
             throw new AppException(ErrorCode.APPOINTMENT_INVALID_STATUS);
         }
 
@@ -183,33 +163,11 @@ public class AppointmentServiceImp implements AppointmentService {
 
     @Override
     @Transactional
-    public AppointmentResponse rejectAppointment(Long appointmentId, Long staffId, String reason) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
-
-        if (appointment.getStatus() != AppointmentStatus.PENDING) {
-            throw new AppException(ErrorCode.APPOINTMENT_INVALID_STATUS);
-        }
-
-        User staff = userRepository.findById(staffId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-
-        AppointmentStatus previous = appointment.getStatus();
-        appointment.setStatus(AppointmentStatus.REJECTED);
-
-        appointment = appointmentRepository.save(appointment);
-        recordHistory(appointment, previous, AppointmentStatus.REJECTED, reason, staff);
-
-        return toResponse(appointment);
-    }
-
-    @Override
-    @Transactional
     public AppointmentResponse markNoShow(Long appointmentId, Long staffId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
 
-        if (appointment.getStatus() != AppointmentStatus.CONFIRMED) {
+        if (appointment.getStatus() != AppointmentStatus.SCHEDULED) {
             throw new AppException(ErrorCode.APPOINTMENT_INVALID_STATUS);
         }
 
@@ -223,6 +181,37 @@ public class AppointmentServiceImp implements AppointmentService {
         recordHistory(appointment, previous, AppointmentStatus.NO_SHOW, null, staff);
 
         return toResponse(appointment);
+    }
+
+    @Override
+    public List<AppointmentSummary> getTodayAppointments(Long staffId) {
+        MedicalStaffProfile profile = medicalStaffProfileRepository.findByUserId(staffId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        return appointmentRepository
+                .findByFacilityIdAndDate(profile.getFacility().getId(), LocalDate.now())
+                .stream()
+                .map(this::toSummary)
+                .toList();
+    }
+
+    @Override
+    public List<AppointmentStatusHistoryResponse> getAppointmentHistory(Long appointmentId) {
+        appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
+
+        return statusHistoryRepository
+                .findByAppointmentIdOrderByChangedAtAsc(appointmentId)
+                .stream()
+                .map(h -> AppointmentStatusHistoryResponse.builder()
+                        .id(h.getId())
+                        .fromStatus(h.getFromStatus())
+                        .toStatus(h.getToStatus())
+                        .reason(h.getReason())
+                        .changedByName(h.getChangedBy().getFullName())
+                        .changedAt(h.getChangedAt())
+                        .build())
+                .toList();
     }
 
     // --- Private helpers ---
@@ -241,10 +230,6 @@ public class AppointmentServiceImp implements AppointmentService {
     }
 
     private AppointmentResponse toResponse(Appointment a) {
-        AppointmentStatusHistory confirmedHistory = statusHistoryRepository
-                .findFirstByAppointmentIdAndToStatus(a.getId(), AppointmentStatus.CONFIRMED)
-                .orElse(null);
-
         return AppointmentResponse.builder()
                 .id(a.getId())
                 .citizenId(a.getCitizen().getId())
@@ -255,9 +240,6 @@ public class AppointmentServiceImp implements AppointmentService {
                 .facilityName(a.getFacility().getName())
                 .preferredDate(a.getPreferredDate())
                 .status(a.getStatus())
-                .confirmedById(confirmedHistory != null ? confirmedHistory.getChangedBy().getId() : null)
-                .confirmedByName(confirmedHistory != null ? confirmedHistory.getChangedBy().getFullName() : null)
-                .confirmedAt(confirmedHistory != null ? confirmedHistory.getChangedAt() : null)
                 .createdAt(a.getCreatedAt())
                 .build();
     }

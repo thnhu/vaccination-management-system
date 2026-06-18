@@ -26,6 +26,9 @@ public enum ErrorCode {
     VACCINE_EXISTED(2002, "Vaccine name already exists", HttpStatus.CONFLICT),
     VACCINE_INACTIVE(2003, "Vaccine is currently inactive", HttpStatus.BAD_REQUEST),
     VACCINE_ALREADY_INACTIVE(2004, "Vaccine is already inactive", HttpStatus.BAD_REQUEST),
+    DOSE_SCHEDULE_DUPLICATE(2005, "Dose schedule already defined for this dose number", HttpStatus.CONFLICT),
+    DISEASE_NOT_FOUND(2006, "Disease not found", HttpStatus.NOT_FOUND),
+    VACCINE_DISEASE_ALREADY_ASSIGNED(2007, "Disease is already linked to this vaccine", HttpStatus.CONFLICT),
 
     // Administrative Unit
     ADMINISTRATIVE_UNIT_NOT_FOUND(3000, "Administrative unit not found", HttpStatus.NOT_FOUND),
@@ -35,11 +38,12 @@ public enum ErrorCode {
     FACILITY_INACTIVE(3002, "Facility is currently unavailable", HttpStatus.BAD_REQUEST),
     FACILITY_CAPACITY_NOT_FOUND(3003, "No capacity configuration found for this facility on the selected date", HttpStatus.BAD_REQUEST),
     FACILITY_WARD_PROVINCE_MISMATCH(3004, "Ward does not belong to the specified province", HttpStatus.BAD_REQUEST),
+    FACILITY_ALREADY_INACTIVE(3005, "Facility is already inactive", HttpStatus.BAD_REQUEST),
 
     // Appointment
     APPOINTMENT_NOT_FOUND(4001, "Appointment not found", HttpStatus.NOT_FOUND),
     APPOINTMENT_SLOT_FULL(4002, "No available slots on this date", HttpStatus.BAD_REQUEST),
-    APPOINTMENT_DUPLICATE(4003, "Pending appointment already exists for this vaccine", HttpStatus.CONFLICT),
+    APPOINTMENT_DUPLICATE(4003, "Scheduled appointment already exists for this vaccine", HttpStatus.CONFLICT),
     APPOINTMENT_DOSE_INTERVAL(4004, "Dose interval not met", HttpStatus.BAD_REQUEST),
     APPOINTMENT_INVALID_STATUS(4005, "Action not allowed for appointment in current status", HttpStatus.BAD_REQUEST),
     CITIZEN_ROLE_REQUIRED(4006, "The specified user does not have CITIZEN role", HttpStatus.BAD_REQUEST),
@@ -55,6 +59,13 @@ public enum ErrorCode {
     BATCH_DEPLETED(5004, "Batch has no remaining doses", HttpStatus.BAD_REQUEST),
     RECORD_APPOINTMENT_MISMATCH(5005, "Record fields do not match the linked appointment", HttpStatus.BAD_REQUEST),
     RECORD_ALREADY_VERIFIED(5006, "Vaccination record has already been verified", HttpStatus.BAD_REQUEST),
+    RECORD_ALREADY_INVALID(5007, "Vaccination record is already invalid", HttpStatus.BAD_REQUEST),
+    BATCH_ALREADY_RECALLED(5008, "Batch has already been recalled", HttpStatus.BAD_REQUEST),
+    BATCH_DUPLICATE(5009, "Batch number already exists in this facility", HttpStatus.CONFLICT),
+
+    // Advisor
+    ADVISOR_TOOL_NOT_FOUND(7001, "Unknown advisor tool requested", HttpStatus.BAD_REQUEST),
+    ADVISOR_SERVICE_ERROR(7002, "Advisor service temporarily unavailable", HttpStatus.SERVICE_UNAVAILABLE),
 
     // Fallback
     UNCATEGORIZED(9999, "An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);

@@ -46,7 +46,7 @@ public class Appointment {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
-    private AppointmentStatus status = AppointmentStatus.PENDING;
+    private AppointmentStatus status = AppointmentStatus.SCHEDULED;
 
     @Column(name = "expired_at")
     private LocalDateTime expiredAt;

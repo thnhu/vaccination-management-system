@@ -1,6 +1,8 @@
 package Vaccination.Management.System.controller;
 
 import Vaccination.Management.System.common.ApiResponse;
+import Vaccination.Management.System.model.dto.vaccine.AssignDiseaseRequest;
+import Vaccination.Management.System.model.dto.vaccine.CreateDoseScheduleRequest;
 import Vaccination.Management.System.model.dto.vaccine.CreateVaccineRequest;
 import Vaccination.Management.System.model.dto.vaccine.UpdateVaccineRequest;
 import Vaccination.Management.System.model.dto.vaccine.VaccineResponse;
@@ -48,5 +50,23 @@ public class VaccineController {
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<ApiResponse<VaccineResponse>> deactivateVaccine(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(vaccineService.deactivateVaccine(id)));
+    }
+
+    @PostMapping("/{id}/dose-schedules")
+    public ResponseEntity<ApiResponse<VaccineResponse>> addDoseSchedule(
+            @PathVariable Long id,
+            @Valid @RequestBody CreateDoseScheduleRequest request) {
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(vaccineService.addDoseSchedule(id, request)));
+    }
+
+    @PostMapping("/{id}/diseases")
+    public ResponseEntity<ApiResponse<VaccineResponse>> assignDisease(
+            @PathVariable Long id,
+            @Valid @RequestBody AssignDiseaseRequest request) {
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(vaccineService.assignDisease(id, request)));
     }
 }

@@ -2,6 +2,7 @@ package Vaccination.Management.System.controller;
 
 import Vaccination.Management.System.common.ApiResponse;
 import Vaccination.Management.System.model.dto.appointment.AppointmentResponse;
+import Vaccination.Management.System.model.dto.appointment.AppointmentStatusHistoryResponse;
 import Vaccination.Management.System.model.dto.appointment.AppointmentSummary;
 import Vaccination.Management.System.model.dto.appointment.CancelAppointmentRequest;
 import Vaccination.Management.System.model.dto.appointment.CreateAppointmentRequest;
@@ -43,14 +44,21 @@ public class AppointmentController {
                 appointmentService. getMyAppointments(citizenId)));
     }
 
-    @PatchMapping("/{id}/confirm")
-    public ResponseEntity<ApiResponse<AppointmentResponse>> confirmAppointment(
-            @PathVariable Long id,
+    @GetMapping("/today")
+    public ResponseEntity<ApiResponse<List<AppointmentSummary>>> getTodayAppointments(
             @AuthenticationPrincipal UserDetails userDetails) {
 
         Long staffId = extractUserId(userDetails);
         return ResponseEntity.ok(ApiResponse.success(
-                appointmentService.confirmAppointment(id, staffId)));
+                appointmentService.getTodayAppointments(staffId)));
+    }
+
+    @GetMapping("/{id}/history")
+    public ResponseEntity<ApiResponse<List<AppointmentStatusHistoryResponse>>> getAppointmentHistory(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(ApiResponse.success(
+                appointmentService.getAppointmentHistory(id)));
     }
 
     @PatchMapping("/{id}/cancel")
@@ -62,17 +70,6 @@ public class AppointmentController {
         Long userId = extractUserId(userDetails);
         return ResponseEntity.ok(ApiResponse.success(
                 appointmentService.cancelAppointment(id, userId, request.getReason())));
-    }
-
-    @PatchMapping("/{id}/reject")
-    public ResponseEntity<ApiResponse<AppointmentResponse>> rejectAppointment(
-            @PathVariable Long id,
-            @Valid @RequestBody CancelAppointmentRequest request,
-            @AuthenticationPrincipal UserDetails userDetails) {
-
-        Long staffId = extractUserId(userDetails);
-        return ResponseEntity.ok(ApiResponse.success(
-                appointmentService.rejectAppointment(id, staffId, request.getReason())));
     }
 
     @PatchMapping("/{id}/no-show")
