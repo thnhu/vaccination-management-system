@@ -2,11 +2,20 @@ package Vaccination.Management.System.service.imp;
 
 import Vaccination.Management.System.exception.AppException;
 import Vaccination.Management.System.exception.ErrorCode;
+import Vaccination.Management.System.model.dto.vaccine.AssignDiseaseRequest;
+import Vaccination.Management.System.model.dto.vaccine.CreateDoseScheduleRequest;
 import Vaccination.Management.System.model.dto.vaccine.CreateVaccineRequest;
 import Vaccination.Management.System.model.dto.vaccine.UpdateVaccineRequest;
 import Vaccination.Management.System.model.dto.vaccine.VaccineResponse;
 import Vaccination.Management.System.model.dto.vaccine.VaccineSummary;
+import Vaccination.Management.System.model.entity.Disease;
 import Vaccination.Management.System.model.entity.Vaccine;
+import Vaccination.Management.System.model.entity.VaccineDisease;
+import Vaccination.Management.System.model.entity.VaccineDiseaseId;
+import Vaccination.Management.System.model.entity.VaccineDoseSchedule;
+import Vaccination.Management.System.repository.DiseaseRepository;
+import Vaccination.Management.System.repository.VaccineDiseaseRepository;
+import Vaccination.Management.System.repository.VaccineDoseScheduleRepository;
 import Vaccination.Management.System.repository.VaccineRepository;
 import Vaccination.Management.System.service.VaccineService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +31,9 @@ import java.util.stream.Collectors;
 public class VaccineServiceImp implements VaccineService {
 
     private final VaccineRepository vaccineRepository;
+    private final VaccineDoseScheduleRepository vaccineDoseScheduleRepository;
+    private final DiseaseRepository diseaseRepository;
+    private final VaccineDiseaseRepository vaccineDiseaseRepository;
 
     @Override
     public List<VaccineSummary> getAllVaccines() {
@@ -86,6 +98,56 @@ public class VaccineServiceImp implements VaccineService {
         vaccine.setActive(false);
         vaccine = vaccineRepository.save(vaccine);
         return toResponse(vaccine);
+    }
+
+    @Override
+    @Transactional
+    public VaccineResponse addDoseSchedule(Long vaccineId, CreateDoseScheduleRequest request) {
+        Vaccine vaccine = vaccineRepository.findById(vaccineId)
+                .orElseThrow(() -> new AppException(ErrorCode.VACCINE_NOT_FOUND));
+
+        if (vaccineDoseScheduleRepository.findByVaccineIdAndDoseNumber(vaccineId, request.getDoseNumber()).isPresent()) {
+            throw new AppException(ErrorCode.DOSE_SCHEDULE_DUPLICATE);
+        }
+
+        VaccineDoseSchedule schedule = VaccineDoseSchedule.builder()
+                .vaccine(vaccine)
+                .doseNumber(request.getDoseNumber())
+                .daysAfterPrevious(request.getDaysAfterPrevious())
+                .build();
+
+        vaccineDoseScheduleRepository.save(schedule);
+
+        Vaccine fresh = vaccineRepository.findById(vaccineId)
+                .orElseThrow(() -> new AppException(ErrorCode.VACCINE_NOT_FOUND));
+        return toResponse(fresh);
+    }
+
+    @Override
+    @Transactional
+    public VaccineResponse assignDisease(Long vaccineId, AssignDiseaseRequest request) {
+        Vaccine vaccine = vaccineRepository.findById(vaccineId)
+                .orElseThrow(() -> new AppException(ErrorCode.VACCINE_NOT_FOUND));
+
+        Disease disease = diseaseRepository.findById(request.getDiseaseId())
+                .orElseThrow(() -> new AppException(ErrorCode.DISEASE_NOT_FOUND));
+
+        VaccineDiseaseId compositeId = new VaccineDiseaseId(vaccineId, request.getDiseaseId());
+        if (vaccineDiseaseRepository.existsById(compositeId)) {
+            throw new AppException(ErrorCode.VACCINE_DISEASE_ALREADY_ASSIGNED);
+        }
+
+        VaccineDisease vaccineDisease = VaccineDisease.builder()
+                .id(compositeId)
+                .vaccine(vaccine)
+                .disease(disease)
+                .build();
+
+        vaccineDiseaseRepository.save(vaccineDisease);
+
+        Vaccine fresh = vaccineRepository.findById(vaccineId)
+                .orElseThrow(() -> new AppException(ErrorCode.VACCINE_NOT_FOUND));
+        return toResponse(fresh);
     }
 
     // --- Mappers ---

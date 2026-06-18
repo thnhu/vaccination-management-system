@@ -1,5 +1,7 @@
 package Vaccination.Management.System.service;
 
+import Vaccination.Management.System.model.dto.vaccine.AssignDiseaseRequest;
+import Vaccination.Management.System.model.dto.vaccine.CreateDoseScheduleRequest;
 import Vaccination.Management.System.model.dto.vaccine.CreateVaccineRequest;
 import Vaccination.Management.System.model.dto.vaccine.UpdateVaccineRequest;
 import Vaccination.Management.System.model.dto.vaccine.VaccineResponse;
@@ -13,4 +15,6 @@ public interface VaccineService {
     VaccineResponse createVaccine(CreateVaccineRequest request);
     VaccineResponse updateVaccine(Long id, UpdateVaccineRequest request);
     VaccineResponse deactivateVaccine(Long id);
+    VaccineResponse addDoseSchedule(Long vaccineId, CreateDoseScheduleRequest request);
+    VaccineResponse assignDisease(Long vaccineId, AssignDiseaseRequest request);
 }

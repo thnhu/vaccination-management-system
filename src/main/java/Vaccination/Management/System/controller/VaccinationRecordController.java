@@ -1,6 +1,7 @@
 package Vaccination.Management.System.controller;
 
 import Vaccination.Management.System.common.ApiResponse;
+import Vaccination.Management.System.model.dto.vaccinationrecord.InvalidateVaccinationRecordRequest;
 import Vaccination.Management.System.model.dto.vaccinationrecord.RecordVaccinationRequest;
 import Vaccination.Management.System.model.dto.vaccinationrecord.VaccinationRecordResponse;
 import Vaccination.Management.System.service.VaccinationRecordService;
@@ -41,5 +42,16 @@ public class VaccinationRecordController {
         String requesterRole = userDetails.getAuthorities().iterator().next().getAuthority();
         return ResponseEntity.ok(ApiResponse.success(
                 vaccinationRecordService.getVaccinationRecords(citizenId, requesterId, requesterRole)));
+    }
+
+    @PatchMapping("/{id}/invalidate")
+    public ResponseEntity<ApiResponse<VaccinationRecordResponse>> invalidateRecord(
+            @PathVariable Long id,
+            @Valid @RequestBody InvalidateVaccinationRecordRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Long staffId = Long.parseLong(userDetails.getUsername());
+        return ResponseEntity.ok(ApiResponse.success(
+                vaccinationRecordService.invalidateRecord(id, staffId, request.getReason())));
     }
 }

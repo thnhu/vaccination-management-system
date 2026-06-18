@@ -1,11 +1,8 @@
 package Vaccination.Management.System.model.enums;
 
 public enum AppointmentStatus {
-    PENDING,
-    CONFIRMED,
+    SCHEDULED,
     VACCINATED,
-    REJECTED,
     CANCELLED,
-    NO_SHOW,
-    EXPIRED
+    NO_SHOW
 }

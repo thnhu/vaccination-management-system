@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
@@ -17,7 +18,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             SELECT COUNT(a) FROM Appointment a
             WHERE a.facility.id = :facilityId
               AND a.preferredDate = :date
-              AND a.status IN ('PENDING', 'CONFIRMED')
+              AND a.status = 'SCHEDULED'
             """)
     long countBookedSlots(@Param("facilityId") Long facilityId,
                           @Param("date") LocalDate date);
@@ -26,10 +27,19 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             SELECT COUNT(a) > 0 FROM Appointment a
             WHERE a.citizen.id = :citizenId
               AND a.vaccine.id = :vaccineId
-              AND a.status IN ('PENDING', 'CONFIRMED')
+              AND a.status = 'SCHEDULED'
             """)
-    boolean existsPendingOrConfirmed(@Param("citizenId") Long citizenId,
-                                     @Param("vaccineId") Long vaccineId);
+    boolean existsScheduled(@Param("citizenId") Long citizenId,
+                             @Param("vaccineId") Long vaccineId);
 
     List<Appointment> findByCitizenId(Long citizenId);
+
+    @Query("""
+            SELECT a FROM Appointment a
+            WHERE a.facility.id = :facilityId
+              AND a.preferredDate = :date
+            ORDER BY a.createdAt ASC
+            """)
+    List<Appointment> findByFacilityIdAndDate(@Param("facilityId") Long facilityId,
+                                               @Param("date") LocalDate date);
 }
