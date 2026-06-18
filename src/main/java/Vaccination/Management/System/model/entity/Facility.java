@@ -2,6 +2,7 @@ package Vaccination.Management.System.model.entity;
 
 import Vaccination.Management.System.model.enums.FacilityType;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Nationalized;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -23,6 +24,7 @@ public class Facility {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Nationalized
     @Column(nullable = false, length = 200)
     private String name;
 
@@ -30,29 +32,24 @@ public class Facility {
     @Column(name = "facility_type", nullable = false, length = 20)
     private FacilityType facilityType;
 
+    @Nationalized
     @Column(nullable = false, length = 255)
     private String address;
 
-    @Column(name = "province_code", nullable = false, length = 10)
-    private String provinceCode;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "province_code", nullable = false)
+    private AdministrativeUnit province;
 
-    @Column(name = "district_code", length = 10)
-    private String districtCode;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ward_code")
+    private AdministrativeUnit ward;
 
     @Column(length = 15)
     private String phone;
 
     @Builder.Default
-    @Column(name = "max_slots_per_day", nullable = false)
-    private Integer maxSlotsPerDay = 50;
-
-    @Builder.Default
     @Column(name = "active")
-    private Boolean active = true;
-
-    @Version
-    @Column(name = "version")
-    private Integer version;
+    private boolean active = true;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)

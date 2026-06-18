@@ -36,11 +36,30 @@ public class SecurityConfig {
 //                        ).permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/vaccines/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/vaccines/**").hasRole("FACILITY_ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/vaccines/**").hasRole("FACILITY_ADMIN")
                         .requestMatchers(HttpMethod.GET, "/facilities/**").permitAll()
                         .requestMatchers("/citizens/me").hasRole("CITIZEN")
                         .requestMatchers("/vaccination-records/**").hasRole("MEDICAL_STAFF")
+                        .requestMatchers(HttpMethod.POST, "/vaccination-records/**").hasRole("MEDICAL_STAFF")
+                        .requestMatchers(HttpMethod.GET,  "/citizens/*/vaccination-records").hasAnyRole("CITIZEN", "MEDICAL_STAFF")
                         .requestMatchers("/appointments/today").hasRole("MEDICAL_STAFF")
+                        .requestMatchers(HttpMethod.POST, "/appointments").hasRole("CITIZEN")
+                        .requestMatchers(HttpMethod.GET,  "/appointments/my").hasRole("CITIZEN")
+                        .requestMatchers(HttpMethod.PATCH, "/appointments/*/confirm").hasRole("MEDICAL_STAFF")
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint((req, res, ex) -> {
+                            res.setStatus(401);
+                            res.setContentType("application/json;charset=UTF-8");
+                            res.getWriter().write("{\"code\":1008,\"message\":\"Unauthorized\"}");
+                        })
+                        .accessDeniedHandler((req, res, ex) -> {
+                            res.setStatus(403);
+                            res.setContentType("application/json;charset=UTF-8");
+                            res.getWriter().write("{\"code\":1006,\"message\":\"Access denied\"}");
+                        })
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

@@ -17,13 +17,13 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
         User user = userRepository.findByPhone(phone)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + phone));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return org.springframework.security.core.userdetails.User
-                .withUsername(user.getPhone())
+                .withUsername(String.valueOf(user.getId()))
                 .password(user.getPassword())
                 .roles(user.getRole().name())
-                .disabled(!user.getActive())
+                .disabled(!user.isActive())
                 .build();
     }
 }

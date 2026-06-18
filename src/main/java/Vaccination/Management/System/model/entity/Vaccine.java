@@ -2,12 +2,17 @@ package Vaccination.Management.System.model.entity;
 
 import Vaccination.Management.System.model.enums.VaccineCategory;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Nationalized;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "vaccine")
@@ -23,21 +28,9 @@ public class Vaccine {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Nationalized
     @Column(nullable = false, unique = true, length = 100)
     private String name;
-
-    @Column(name = "scientific_name", length = 100)
-    private String scientificName;
-
-    @Column(nullable = false, length = 100)
-    private String manufacturer;
-
-    @Builder.Default
-    @Column(name = "required_doses", nullable = false)
-    private Integer requiredDoses = 1;
-
-    @Column(name = "days_between_doses")
-    private Integer daysBetweenDoses;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "category", length = 20, nullable = false)
@@ -45,7 +38,16 @@ public class Vaccine {
 
     @Builder.Default
     @Column(name = "active")
-    private Boolean active = true;
+    private boolean active = true;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "vaccine", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("doseNumber ASC")
+    private List<VaccineDoseSchedule> doseSchedules = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "vaccine", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<VaccineDisease> vaccineDiseases = new HashSet<>();
 
     @CreatedDate
     @Column(name = "created_at", updatable = false, columnDefinition = "DATETIME2")
