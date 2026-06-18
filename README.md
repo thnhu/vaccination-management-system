@@ -291,7 +291,7 @@ curl -X POST http://localhost:8080/vaccination/advisor/chat \
 
 ## Test Coverage
 
-**257 tests · 0 failures · 1 skipped** (skipped test requires a live DB connection)
+**257 tests · 0 failures**
 
 ### Service Layer
 
