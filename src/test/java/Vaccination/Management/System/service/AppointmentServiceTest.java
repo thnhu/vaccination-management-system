@@ -101,7 +101,6 @@ class AppointmentServiceTest {
                 .doseSchedule(dose1).preferredDate(PREFERRED_DATE)
                 .status(AppointmentStatus.SCHEDULED).createdAt(LocalDateTime.now()).build();
         when(appointmentRepository.save(any())).thenReturn(savedAppointment);
-        when(statusHistoryRepository.save(any())).thenReturn(new AppointmentStatusHistory());
 
         AppointmentResponse response = appointmentService.createAppointment(request, 1L);
 
@@ -115,7 +114,7 @@ class AppointmentServiceTest {
         ArgumentCaptor<Appointment> captor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentRepository).save(captor.capture());
         assertThat(captor.getValue().getStatus()).isEqualTo(AppointmentStatus.SCHEDULED);
-        verify(statusHistoryRepository).save(any(AppointmentStatusHistory.class));
+        verify(statusHistoryRepository, never()).save(any(AppointmentStatusHistory.class));
     }
 
     @Test
@@ -146,7 +145,6 @@ class AppointmentServiceTest {
                 .doseSchedule(dose2).preferredDate(preferredDate2)
                 .status(AppointmentStatus.SCHEDULED).createdAt(LocalDateTime.now()).build();
         when(appointmentRepository.save(any())).thenReturn(saved);
-        when(statusHistoryRepository.save(any())).thenReturn(new AppointmentStatusHistory());
 
         AppointmentResponse response = appointmentService.createAppointment(request, 1L);
 
