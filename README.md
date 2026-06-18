@@ -289,10 +289,66 @@ curl -X POST http://localhost:8080/vaccination/advisor/chat \
 
 **2-level administrative units** — PROVINCE and WARD only, reflecting Vietnam's administrative reform effective May 2026.
 
+## Test Coverage
+
+**257 tests · 0 failures · 1 skipped** (skipped test requires a live DB connection)
+
+### Service Layer
+
+| Test Class | Tests | What is covered |
+|---|---|---|
+| `AppointmentServiceTest` | 23 | Book (first dose, second dose, interval validation), cancel, no-show, guard clauses |
+| `FacilityServiceTest` | 27 | Create, update, deactivate, capacity management |
+| `VaccineServiceTest` | 23 | Create, update, deactivate, dose schedule linkage |
+| `VaccinationRecordServiceTest` | 18 | Direct record, retrospective entry, invalidation, immutability |
+| `VaccineBatchServiceTest` | 15 | Import batch, recall, inventory depletion |
+| `CitizenServiceTest` | 13 | Profile view, profile update |
+| `AuthServiceTest` | 9 | Register, login, duplicate phone/email |
+
+### AI Advisor
+
+| Test Class | Tests | What is covered |
+|---|---|---|
+| `AdvisorServiceTest` | 22 | Happy path (TC-01–05), tool behavior (TC-06–09), guardrail (TC-10–14), multi-turn (TC-15–17), edge cases (TC-18–21), history windowing (TC-22) |
+| `FaqServiceTest` | 30 | Keyword matching, Vietnamese normalization, all 15 FAQ entries |
+| `GuardrailServiceTest` | 6 | Dangerous keyword detection, emergency advice injection |
+| `ToolExecutorServiceTest` | 8 | Tool dispatch to correct service, error propagation |
+| `RecommendationServiceTest` | 7 | Next dose calculation, series completion, interval check |
+| `AvailableSlotServiceTest` | 5 | Slot counting against capacity, date range |
+
+### Controller Layer (Spring MVC integration)
+
+| Test Class | Tests | What is covered |
+|---|---|---|
+| `AuthControllerTest` | 12 | Register/login success and error responses |
+| `VaccinationRecordControllerTest` | 12 | Record endpoints, HTTP status codes |
+| `AppointmentControllerTest` | 11 | Booking, cancel, no-show, history endpoints |
+| `FacilityControllerTest` | 8 | Facility CRUD endpoints |
+| `VaccineControllerTest` | 7 | Vaccine CRUD endpoints |
+
+```
+mvn test
+# Tests run: 257, Failures: 0, Errors: 0, Skipped: 1
+# BUILD SUCCESS
+```
+
+### JaCoCo Coverage Report
+
+**Overall (all packages)**
+
+![JaCoCo Overview](https://raw.githubusercontent.com/thnhu/vaccination-management-backend/feat/ai-advisor/docs/jacoco-overview.png)
+
+**Service layer**
+
+![JaCoCo Service Layer](https://raw.githubusercontent.com/thnhu/vaccination-management-backend/feat/ai-advisor/docs/jacoco-service.png)
+
+**AI Advisor layer**
+
+![JaCoCo Advisor Layer](https://raw.githubusercontent.com/thnhu/vaccination-management-backend/feat/ai-advisor/docs/jacoco-advisor.png)
+
 ## Development Workflow
 
 - Branch strategy: `main` → `feat/<feature-name>`
 - Conventional Commits
 - Strict layer separation: Controller → Service → Repository (no cross-layer imports)
-- Test suite: unit tests on service layer, 22 AI Advisor test cases (happy path, tool behavior, guardrail, multi-turn, edge cases)
 - Run `mvn test` before every merge; all tests must pass
