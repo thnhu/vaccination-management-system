@@ -13,8 +13,6 @@ A Java Spring Boot backend for managing vaccination records, appointments, vacci
 | Database | SQL Server |
 | AI | Anthropic Claude API (Citizen Advisor) |
 | Build Tool | Maven |
-| Deploy | Railway / Render |
-
 ## Key Features
 
 **Core Domain**
