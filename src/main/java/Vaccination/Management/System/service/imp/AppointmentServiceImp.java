@@ -145,6 +145,10 @@ public class AppointmentServiceImp implements AppointmentService {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
 
+        if (!appointment.getCitizen().getId().equals(userId)) {
+            throw new AppException(ErrorCode.ACCESS_DENIED);
+        }
+
         if (appointment.getStatus() != AppointmentStatus.SCHEDULED) {
             throw new AppException(ErrorCode.APPOINTMENT_INVALID_STATUS);
         }

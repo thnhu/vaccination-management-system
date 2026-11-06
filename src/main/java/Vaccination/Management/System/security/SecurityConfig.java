@@ -52,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/appointments").hasRole("CITIZEN")
                         .requestMatchers(HttpMethod.GET,  "/appointments/my").hasRole("CITIZEN")
                         .requestMatchers(HttpMethod.PATCH, "/appointments/*/confirm").hasRole("MEDICAL_STAFF")
+                        .requestMatchers(HttpMethod.PATCH, "/appointments/*/no-show").hasRole("MEDICAL_STAFF")
                         .requestMatchers(HttpMethod.POST, "/advisor/chat").hasRole("CITIZEN")
                         .requestMatchers(HttpMethod.GET, "/advisor/recommendations").hasRole("CITIZEN")
                         .requestMatchers(HttpMethod.GET, "/advisor/available-slots").permitAll()

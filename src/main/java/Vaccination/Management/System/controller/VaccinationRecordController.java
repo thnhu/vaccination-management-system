@@ -16,13 +16,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/vaccination-records")
 @RequiredArgsConstructor
 public class VaccinationRecordController {
 
     private final VaccinationRecordService vaccinationRecordService;
 
-    @PostMapping
+    @PostMapping("/vaccination-records")
     public ResponseEntity<ApiResponse<VaccinationRecordResponse>> recordVaccination(
             @Valid @RequestBody RecordVaccinationRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -44,7 +43,7 @@ public class VaccinationRecordController {
                 vaccinationRecordService.getVaccinationRecords(citizenId, requesterId, requesterRole)));
     }
 
-    @PatchMapping("/{id}/invalidate")
+    @PatchMapping("/vaccination-records/{id}/invalidate")
     public ResponseEntity<ApiResponse<VaccinationRecordResponse>> invalidateRecord(
             @PathVariable Long id,
             @Valid @RequestBody InvalidateVaccinationRecordRequest request,

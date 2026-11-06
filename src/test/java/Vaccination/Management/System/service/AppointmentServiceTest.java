@@ -377,6 +377,22 @@ class AppointmentServiceTest {
                         .isEqualTo(ErrorCode.APPOINTMENT_INVALID_STATUS));
     }
 
+    @Test
+    void cancelAppointment_throwsAccessDenied_whenNotOwner() {
+        Appointment scheduled = Appointment.builder()
+                .id(9L).citizen(citizen).vaccine(vaccine).facility(facility)
+                .doseSchedule(dose1).preferredDate(PREFERRED_DATE)
+                .status(AppointmentStatus.SCHEDULED).build();
+
+        when(appointmentRepository.findById(9L)).thenReturn(Optional.of(scheduled));
+
+        assertThatThrownBy(() -> appointmentService.cancelAppointment(9L, 999L, "x"))
+                .isInstanceOf(AppException.class)
+                .satisfies(ex -> assertThat(((AppException) ex).getErrorCode())
+                        .isEqualTo(ErrorCode.ACCESS_DENIED));
+        verify(appointmentRepository, never()).save(any());
+    }
+
     //  markNoShow
 
     @Test

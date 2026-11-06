@@ -184,7 +184,7 @@ class VaccinationRecordControllerTest {
                 .andExpect(jsonPath("$.code").value(5002));
     }
 
-    //GET /vaccination-records/citizens/{citizenId}/vaccination-records
+    //GET /citizens/{citizenId}/vaccination-records
 
     @Test
     @WithMockUser(username = "1", roles = {"CITIZEN"})
@@ -201,7 +201,7 @@ class VaccinationRecordControllerTest {
         when(vaccinationRecordService.getVaccinationRecords(eq(1L), eq(1L), any()))
                 .thenReturn(List.of(r1, r2));
 
-        mockMvc.perform(get("/vaccination-records/citizens/1/vaccination-records"))
+        mockMvc.perform(get("/citizens/1/vaccination-records"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(1000))
                 .andExpect(jsonPath("$.result").isArray())
@@ -218,7 +218,7 @@ class VaccinationRecordControllerTest {
         when(vaccinationRecordService.getVaccinationRecords(eq(1L), eq(1L), any()))
                 .thenReturn(Collections.emptyList());
 
-        mockMvc.perform(get("/vaccination-records/citizens/1/vaccination-records"))
+        mockMvc.perform(get("/citizens/1/vaccination-records"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").isArray())
                 .andExpect(jsonPath("$.result.length()").value(0));
@@ -230,7 +230,7 @@ class VaccinationRecordControllerTest {
         when(vaccinationRecordService.getVaccinationRecords(eq(2L), eq(1L), any()))
                 .thenThrow(new AppException(ErrorCode.ACCESS_DENIED));
 
-        mockMvc.perform(get("/vaccination-records/citizens/2/vaccination-records"))
+        mockMvc.perform(get("/citizens/2/vaccination-records"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value(1006))
                 .andExpect(jsonPath("$.message").value("Access denied"));
