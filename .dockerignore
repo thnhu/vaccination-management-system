@@ -1,0 +1,17 @@
+target/
+.git/
+.idea/
+.claude/
+*.log
+C*vms_app.log
+docs/
+*.md
+seed.sql
+test-requests.http
+
+# Never bake local secrets into the image; config comes from environment variables.
+src/main/resources/application.properties
+src/main/resources/application-*.properties
+src/test/resources/application*.properties
+.env
+.env.*
