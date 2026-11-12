@@ -79,6 +79,19 @@ public class Vaccine {
     @Column(length = 200)
     private String storage;
 
+    /** Co-administration and drug interactions. */
+    @Nationalized
+    @Column(length = 2000)
+    private String interactions;
+
+    /**
+     * Human-readable regimen by age group, incl. boosters (e.g. "2–6 months: 2 doses ≥ 2 months apart…").
+     * Display only — booking rules still come from vaccine_dose_schedule.
+     */
+    @Nationalized
+    @Column(name = "schedule_notes", length = 2000)
+    private String scheduleNotes;
+
     @Builder.Default
     @OneToMany(mappedBy = "vaccine", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("doseNumber ASC")

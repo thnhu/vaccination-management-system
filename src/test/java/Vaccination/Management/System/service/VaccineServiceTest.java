@@ -479,8 +479,13 @@ class VaccineServiceTest {
         req.setContraindications("Quá mẫn với thành phần vắc xin");
         req.setMinAgeMonths(24);
         req.setStorage("   ");
+        req.setInteractions("Có thể tiêm cùng ngày với vắc xin khác, ở vị trí khác.");
+        req.setScheduleNotes("Từ 2 tuổi: 2 mũi, cách nhau ít nhất 1 tháng.");
 
         VaccineResponse res = vaccineService.updateVaccine(1L, req);
+
+        assertThat(res.getInteractions()).isEqualTo("Có thể tiêm cùng ngày với vắc xin khác, ở vị trí khác.");
+        assertThat(res.getScheduleNotes()).isEqualTo("Từ 2 tuổi: 2 mũi, cách nhau ít nhất 1 tháng.");
 
         assertThat(res.getRoute()).isEqualTo("Tiêm bắp");
         assertThat(res.getContraindications()).isEqualTo("Quá mẫn với thành phần vắc xin");

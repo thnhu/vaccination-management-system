@@ -112,6 +112,8 @@ public class VaccineServiceImp implements VaccineService {
         if (request.getPrecautions() != null) vaccine.setPrecautions(blankToNull(request.getPrecautions()));
         if (request.getSideEffects() != null) vaccine.setSideEffects(blankToNull(request.getSideEffects()));
         if (request.getStorage() != null) vaccine.setStorage(blankToNull(request.getStorage()));
+        if (request.getInteractions() != null) vaccine.setInteractions(blankToNull(request.getInteractions()));
+        if (request.getScheduleNotes() != null) vaccine.setScheduleNotes(blankToNull(request.getScheduleNotes()));
         if (request.getMinAgeMonths() != null) vaccine.setMinAgeMonths(request.getMinAgeMonths());
         if (request.getMaxAgeMonths() != null) vaccine.setMaxAgeMonths(request.getMaxAgeMonths());
 
@@ -255,6 +257,8 @@ public class VaccineServiceImp implements VaccineService {
                 .precautions(vaccine.getPrecautions())
                 .sideEffects(vaccine.getSideEffects())
                 .storage(vaccine.getStorage())
+                .interactions(vaccine.getInteractions())
+                .scheduleNotes(vaccine.getScheduleNotes())
                 .createdAt(vaccine.getCreatedAt())
                 .updatedAt(vaccine.getUpdatedAt())
                 .build();

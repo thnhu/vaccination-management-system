@@ -31,6 +31,8 @@ public class VaccineResponse {
     private String precautions;
     private String sideEffects;
     private String storage;
+    private String interactions;
+    private String scheduleNotes;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

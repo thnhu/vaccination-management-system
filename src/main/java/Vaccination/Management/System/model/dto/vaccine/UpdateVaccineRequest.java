@@ -42,4 +42,10 @@ public class UpdateVaccineRequest {
 
     @Size(max = 200)
     private String storage;
+
+    @Size(max = 2000)
+    private String interactions;
+
+    @Size(max = 2000)
+    private String scheduleNotes;
 }
