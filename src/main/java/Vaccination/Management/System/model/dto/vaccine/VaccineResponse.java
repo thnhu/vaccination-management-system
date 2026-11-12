@@ -18,6 +18,20 @@ public class VaccineResponse {
     private Integer totalDoses;
     private List<DoseScheduleInfo> doseSchedules;
     private Set<DiseaseInfo> diseases;
+
+    // --- Public catalogue content (null when not set) ---
+    private Long manufacturerId;
+    private String manufacturerName;
+    private String countryOfOrigin;
+    private String description;
+    private Integer minAgeMonths;
+    private Integer maxAgeMonths;
+    private String route;
+    private String contraindications;
+    private String precautions;
+    private String sideEffects;
+    private String storage;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

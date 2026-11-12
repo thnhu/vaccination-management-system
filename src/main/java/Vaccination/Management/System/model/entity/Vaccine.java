@@ -40,6 +40,45 @@ public class Vaccine {
     @Column(name = "active")
     private boolean active = true;
 
+    // --- Public catalogue content (all optional; shown on the public vaccine page) ---
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manufacturer_id")
+    private Manufacturer manufacturer;
+
+    @Nationalized
+    @Column(length = 1000)
+    private String description;
+
+    /** Youngest eligible age in months (inclusive); null = no lower bound stated. */
+    @Column(name = "min_age_months")
+    private Integer minAgeMonths;
+
+    /** Oldest eligible age in months (inclusive); null = no upper bound stated. */
+    @Column(name = "max_age_months")
+    private Integer maxAgeMonths;
+
+    /** Route of administration, e.g. "Tiêm bắp". */
+    @Nationalized
+    @Column(length = 100)
+    private String route;
+
+    @Nationalized
+    @Column(length = 1000)
+    private String contraindications;
+
+    @Nationalized
+    @Column(length = 1000)
+    private String precautions;
+
+    @Nationalized
+    @Column(name = "side_effects", length = 1000)
+    private String sideEffects;
+
+    @Nationalized
+    @Column(length = 200)
+    private String storage;
+
     @Builder.Default
     @OneToMany(mappedBy = "vaccine", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("doseNumber ASC")

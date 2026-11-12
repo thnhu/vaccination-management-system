@@ -21,4 +21,8 @@ public class UpdateFacilityRequest {
 
     @Size(max = 15)
     private String phone;
+
+    /** Empty string clears it. */
+    @Size(max = 100)
+    private String openingHours;
 }

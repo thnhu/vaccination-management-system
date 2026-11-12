@@ -7,7 +7,9 @@ import Vaccination.Management.System.model.dto.facility.FacilityResponse;
 import Vaccination.Management.System.model.dto.facility.UpdateFacilityRequest;
 import Vaccination.Management.System.model.dto.vaccinebatch.CreateVaccineBatchRequest;
 import Vaccination.Management.System.model.dto.vaccinebatch.VaccineBatchResponse;
+import Vaccination.Management.System.model.dto.catalog.FacilityVaccineResponse;
 import Vaccination.Management.System.service.FacilityService;
+import Vaccination.Management.System.service.PublicCatalogService;
 import Vaccination.Management.System.service.VaccineBatchService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class FacilityController {
 
     private final FacilityService facilityService;
     private final VaccineBatchService vaccineBatchService;
+    private final PublicCatalogService publicCatalogService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<FacilityResponse>>> getAllFacilities() {
@@ -35,6 +38,12 @@ public class FacilityController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<FacilityResponse>> getFacilityById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(facilityService.getFacilityById(id)));
+    }
+
+    /** Public: vaccines this facility can give today, with the price range of each. No batch data. */
+    @GetMapping("/{id}/vaccines")
+    public ResponseEntity<ApiResponse<List<FacilityVaccineResponse>>> getFacilityVaccines(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(publicCatalogService.getFacilityVaccines(id)));
     }
 
     @PatchMapping("/{id}")

@@ -41,8 +41,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/vaccines/**").hasRole("FACILITY_ADMIN")
                         .requestMatchers(HttpMethod.POST, "/facilities/**").hasRole("FACILITY_ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/facilities/**").hasRole("FACILITY_ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/facilities/**").permitAll()
+                        // Order matters: the first matching rule wins. The batch rule must come before the
+                        // public GET /facilities/** or batch numbers and stock become public (C23).
                         .requestMatchers(HttpMethod.GET,  "/facilities/*/batches").hasAnyRole("FACILITY_ADMIN", "MEDICAL_STAFF")
+                        .requestMatchers(HttpMethod.GET, "/facilities/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/batches/*/recall").hasRole("FACILITY_ADMIN")
                         .requestMatchers("/citizens/me").hasRole("CITIZEN")
                         .requestMatchers("/vaccination-records/**").hasRole("MEDICAL_STAFF")

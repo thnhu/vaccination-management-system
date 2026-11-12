@@ -16,6 +16,13 @@ import Vaccination.Management.System.model.dto.vaccine.CreateVaccineRequest;
 import Vaccination.Management.System.model.dto.vaccine.UpdateVaccineRequest;
 import Vaccination.Management.System.model.entity.VaccineDiseaseId;
 import Vaccination.Management.System.repository.DiseaseRepository;
+import Vaccination.Management.System.repository.ManufacturerRepository;
+import Vaccination.Management.System.repository.VaccineBatchRepository;
+import Vaccination.Management.System.repository.StockPriceRow;
+import Vaccination.Management.System.model.entity.Manufacturer;
+import Vaccination.Management.System.model.enums.BatchStatus;
+import java.math.BigDecimal;
+import static org.mockito.ArgumentMatchers.eq;
 import Vaccination.Management.System.repository.VaccineDiseaseRepository;
 import Vaccination.Management.System.repository.VaccineDoseScheduleRepository;
 import Vaccination.Management.System.repository.VaccineRepository;
@@ -44,6 +51,8 @@ class VaccineServiceTest {
     @Mock private VaccineDoseScheduleRepository vaccineDoseScheduleRepository;
     @Mock private DiseaseRepository diseaseRepository;
     @Mock private VaccineDiseaseRepository vaccineDiseaseRepository;
+    @Mock private VaccineBatchRepository vaccineBatchRepository;
+    @Mock private ManufacturerRepository manufacturerRepository;
 
     @InjectMocks
     private VaccineServiceImp vaccineService;
@@ -427,7 +436,96 @@ class VaccineServiceTest {
                         .isEqualTo(ErrorCode.VACCINE_DISEASE_ALREADY_ASSIGNED));
     }
 
+    // public catalogue: price/stock summary and content
+
+    @Test
+    void getAllVaccines_includesPriceRangeAndFacilityCount_fromUsableStock() {
+        Vaccine withStock = buildVaccine(1L, "Có hàng", VaccineCategory.ADULT, true, 1);
+        Vaccine noStock = buildVaccine(2L, "Hết hàng", VaccineCategory.ADULT, true, 1);
+        when(vaccineRepository.findAll()).thenReturn(List.of(withStock, noStock));
+        when(vaccineBatchRepository.summarizeUsableStockByVaccine(eq(BatchStatus.ACTIVE), any()))
+                .thenReturn(List.of(row(1L, "300000", "350000", 2L)));
+
+        List<VaccineSummary> result = vaccineService.getAllVaccines();
+
+        assertThat(result.get(0).getMinPrice()).isEqualByComparingTo("300000");
+        assertThat(result.get(0).getMaxPrice()).isEqualByComparingTo("350000");
+        assertThat(result.get(0).getAvailableFacilityCount()).isEqualTo(2);
+        assertThat(result.get(1).getMinPrice()).isNull();
+        assertThat(result.get(1).getAvailableFacilityCount()).isZero();
+    }
+
+    @Test
+    void getAllVaccines_includesManufacturerAndCountry() {
+        Vaccine v = buildVaccine(1L, "A", VaccineCategory.ADULT, true, 1);
+        v.setManufacturer(Manufacturer.builder().id(5L).name("GSK").countryOfOrigin("Bỉ").build());
+        when(vaccineRepository.findAll()).thenReturn(List.of(v));
+
+        VaccineSummary s = vaccineService.getAllVaccines().get(0);
+
+        assertThat(s.getManufacturerName()).isEqualTo("GSK");
+        assertThat(s.getCountryOfOrigin()).isEqualTo("Bỉ");
+    }
+
+    @Test
+    void updateVaccine_setsContentFields_andBlankClearsThem() {
+        Vaccine v = buildVaccine(1L, "A", VaccineCategory.ADULT, true, 1);
+        v.setStorage("2–8°C");
+        when(vaccineRepository.findById(1L)).thenReturn(Optional.of(v));
+        when(vaccineRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        UpdateVaccineRequest req = new UpdateVaccineRequest();
+        req.setRoute("Tiêm bắp");
+        req.setContraindications("Quá mẫn với thành phần vắc xin");
+        req.setMinAgeMonths(24);
+        req.setStorage("   ");
+
+        VaccineResponse res = vaccineService.updateVaccine(1L, req);
+
+        assertThat(res.getRoute()).isEqualTo("Tiêm bắp");
+        assertThat(res.getContraindications()).isEqualTo("Quá mẫn với thành phần vắc xin");
+        assertThat(res.getMinAgeMonths()).isEqualTo(24);
+        assertThat(res.getStorage()).isNull();
+    }
+
+    @Test
+    void updateVaccine_rejectsMinAgeAboveExistingMaxAge() {
+        Vaccine v = buildVaccine(1L, "A", VaccineCategory.ADULT, true, 1);
+        v.setMaxAgeMonths(12);
+        when(vaccineRepository.findById(1L)).thenReturn(Optional.of(v));
+
+        UpdateVaccineRequest req = new UpdateVaccineRequest();
+        req.setMinAgeMonths(24);
+
+        assertThatThrownBy(() -> vaccineService.updateVaccine(1L, req))
+                .isInstanceOf(AppException.class)
+                .satisfies(ex -> assertThat(((AppException) ex).getErrorCode()).isEqualTo(ErrorCode.INVALID_AGE_RANGE));
+    }
+
+    @Test
+    void updateVaccine_unknownManufacturer_throws() {
+        Vaccine v = buildVaccine(1L, "A", VaccineCategory.ADULT, true, 1);
+        when(vaccineRepository.findById(1L)).thenReturn(Optional.of(v));
+        when(manufacturerRepository.findById(99L)).thenReturn(Optional.empty());
+
+        UpdateVaccineRequest req = new UpdateVaccineRequest();
+        req.setManufacturerId(99L);
+
+        assertThatThrownBy(() -> vaccineService.updateVaccine(1L, req))
+                .isInstanceOf(AppException.class)
+                .satisfies(ex -> assertThat(((AppException) ex).getErrorCode()).isEqualTo(ErrorCode.MANUFACTURER_NOT_FOUND));
+    }
+
     // helpers
+
+    static StockPriceRow row(Long key, String min, String max, Long facilities) {
+        return new StockPriceRow() {
+            public Long getKeyId() { return key; }
+            public BigDecimal getMinPrice() { return min == null ? null : new BigDecimal(min); }
+            public BigDecimal getMaxPrice() { return max == null ? null : new BigDecimal(max); }
+            public Long getFacilityCount() { return facilities; }
+        };
+    }
 
     private Vaccine buildVaccine(Long id, String name, VaccineCategory category,
                                   boolean active, int doseCount) {

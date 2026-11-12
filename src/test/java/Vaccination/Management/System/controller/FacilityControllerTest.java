@@ -8,6 +8,10 @@ import Vaccination.Management.System.security.CustomUserDetailsService;
 import Vaccination.Management.System.security.JwtUtil;
 import Vaccination.Management.System.service.FacilityService;
 import Vaccination.Management.System.service.VaccineBatchService;
+import Vaccination.Management.System.service.PublicCatalogService;
+import Vaccination.Management.System.model.dto.catalog.FacilityVaccineResponse;
+import Vaccination.Management.System.model.enums.VaccineCategory;
+import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -31,6 +35,7 @@ class FacilityControllerTest {
 
     @MockitoBean private FacilityService facilityService;
     @MockitoBean private VaccineBatchService vaccineBatchService;
+    @MockitoBean private PublicCatalogService publicCatalogService;
     @MockitoBean private JwtUtil jwtUtil;
     @MockitoBean private CustomUserDetailsService customUserDetailsService;
 
@@ -161,5 +166,31 @@ class FacilityControllerTest {
                 .provinceCode(provinceCode).provinceName(provinceName)
                 .wardCode(wardCode).wardName(wardName)
                 .active(true).build();
+    }
+
+    // GET /facilities/{id}/vaccines
+
+    @Test
+    void getFacilityVaccines_returnsVaccinesWithPriceRange() throws Exception {
+        when(publicCatalogService.getFacilityVaccines(1L)).thenReturn(List.of(
+                FacilityVaccineResponse.builder()
+                        .vaccineId(2L).vaccineName("Vaxigrip Tetra").category(VaccineCategory.ALL_AGES).totalDoses(1)
+                        .minPrice(new BigDecimal("356000")).maxPrice(new BigDecimal("356000"))
+                        .build()));
+
+        mockMvc.perform(get("/facilities/1/vaccines"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result[0].vaccineName").value("Vaxigrip Tetra"))
+                .andExpect(jsonPath("$.result[0].minPrice").value(356000))
+                .andExpect(jsonPath("$.result[0].batchNumber").doesNotExist());
+    }
+
+    @Test
+    void getFacilityVaccines_unknownFacility_returns404() throws Exception {
+        when(publicCatalogService.getFacilityVaccines(9L)).thenThrow(new AppException(ErrorCode.FACILITY_NOT_FOUND));
+
+        mockMvc.perform(get("/facilities/9/vaccines"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(3001));
     }
 }

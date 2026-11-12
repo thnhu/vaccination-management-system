@@ -99,6 +99,10 @@ public class FacilityServiceImp implements FacilityService {
         if (request.getPhone() != null) {
             facility.setPhone(request.getPhone());
         }
+        if (request.getOpeningHours() != null) {
+            String hours = request.getOpeningHours().trim();
+            facility.setOpeningHours(hours.isEmpty() ? null : hours);
+        }
         if (request.getProvinceCode() != null) {
             AdministrativeUnit province = administrativeUnitRepository.findById(request.getProvinceCode())
                     .orElseThrow(() -> new AppException(ErrorCode.ADMINISTRATIVE_UNIT_NOT_FOUND));
@@ -172,6 +176,7 @@ public class FacilityServiceImp implements FacilityService {
                 .wardCode(f.getWard() != null ? f.getWard().getCode() : null)
                 .wardName(f.getWard() != null ? f.getWard().getName() : null)
                 .phone(f.getPhone())
+                .openingHours(f.getOpeningHours())
                 .active(f.isActive())
                 .createdAt(f.getCreatedAt())
                 .updatedAt(f.getUpdatedAt())

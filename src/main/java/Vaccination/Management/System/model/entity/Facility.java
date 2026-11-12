@@ -47,6 +47,11 @@ public class Facility {
     @Column(length = 15)
     private String phone;
 
+    /** Free text shown to the public, e.g. "7:30–17:00, thứ 2 – chủ nhật". */
+    @Nationalized
+    @Column(name = "opening_hours", length = 100)
+    private String openingHours;
+
     @Builder.Default
     @Column(name = "active")
     private boolean active = true;

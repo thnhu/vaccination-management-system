@@ -8,6 +8,9 @@ import Vaccination.Management.System.model.enums.VaccineCategory;
 import Vaccination.Management.System.security.CustomUserDetailsService;
 import Vaccination.Management.System.security.JwtUtil;
 import Vaccination.Management.System.service.VaccineService;
+import Vaccination.Management.System.service.PublicCatalogService;
+import Vaccination.Management.System.model.dto.catalog.VaccineAvailabilityResponse;
+import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -33,6 +36,9 @@ class VaccineControllerTest {
 
     @MockitoBean
     private VaccineService vaccineService;
+
+    @MockitoBean
+    private PublicCatalogService publicCatalogService;
 
     @MockitoBean
     private JwtUtil jwtUtil;
@@ -166,5 +172,35 @@ class VaccineControllerTest {
                 .andExpect(jsonPath("$.result.totalDoses").value(0))
                 .andExpect(jsonPath("$.result.doseSchedules").isEmpty())
                 .andExpect(jsonPath("$.result.diseases").isEmpty());
+    }
+
+    // GET /vaccines/{id}/availability
+
+    @Test
+    void getAvailability_returnsFacilitiesWithPriceRange_andNoBatchFields() throws Exception {
+        when(publicCatalogService.getVaccineAvailability(3L)).thenReturn(List.of(
+                VaccineAvailabilityResponse.builder()
+                        .facilityId(1L).facilityName("Cơ sở A").provinceName("Hà Nội")
+                        .openingHours("7:30–17:00")
+                        .minPrice(new BigDecimal("150000")).maxPrice(new BigDecimal("180000"))
+                        .build()));
+
+        mockMvc.perform(get("/vaccines/3/availability"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result[0].facilityName").value("Cơ sở A"))
+                .andExpect(jsonPath("$.result[0].openingHours").value("7:30–17:00"))
+                .andExpect(jsonPath("$.result[0].minPrice").value(150000))
+                .andExpect(jsonPath("$.result[0].maxPrice").value(180000))
+                .andExpect(jsonPath("$.result[0].batchNumber").doesNotExist())
+                .andExpect(jsonPath("$.result[0].remaining").doesNotExist());
+    }
+
+    @Test
+    void getAvailability_unknownVaccine_returns404() throws Exception {
+        when(publicCatalogService.getVaccineAvailability(9L)).thenThrow(new AppException(ErrorCode.VACCINE_NOT_FOUND));
+
+        mockMvc.perform(get("/vaccines/9/availability"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(2001));
     }
 }

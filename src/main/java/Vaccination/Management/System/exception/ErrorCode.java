@@ -34,6 +34,8 @@ public enum ErrorCode {
     DOSE_SCHEDULE_DUPLICATE(2005, "Dose schedule already defined for this dose number", HttpStatus.CONFLICT),
     DISEASE_NOT_FOUND(2006, "Disease not found", HttpStatus.NOT_FOUND),
     VACCINE_DISEASE_ALREADY_ASSIGNED(2007, "Disease is already linked to this vaccine", HttpStatus.CONFLICT),
+    INVALID_AGE_RANGE(2008, "Minimum age must not be greater than maximum age", HttpStatus.BAD_REQUEST),
+    MANUFACTURER_NOT_FOUND(2009, "Manufacturer not found", HttpStatus.NOT_FOUND),
 
     // Administrative Unit
     ADMINISTRATIVE_UNIT_NOT_FOUND(3000, "Administrative unit not found", HttpStatus.NOT_FOUND),

@@ -7,6 +7,8 @@ import Vaccination.Management.System.model.dto.vaccine.CreateVaccineRequest;
 import Vaccination.Management.System.model.dto.vaccine.UpdateVaccineRequest;
 import Vaccination.Management.System.model.dto.vaccine.VaccineResponse;
 import Vaccination.Management.System.model.dto.vaccine.VaccineSummary;
+import Vaccination.Management.System.model.dto.catalog.VaccineAvailabilityResponse;
+import Vaccination.Management.System.service.PublicCatalogService;
 import Vaccination.Management.System.service.VaccineService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import java.util.List;
 public class VaccineController {
 
     private final VaccineService vaccineService;
+    private final PublicCatalogService publicCatalogService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<VaccineSummary>>> getAllVaccines() {
@@ -31,6 +34,12 @@ public class VaccineController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<VaccineResponse>> getVaccineById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(vaccineService.getVaccineById(id)));
+    }
+
+    /** Public: facilities that can give this vaccine today, with the price range at each. */
+    @GetMapping("/{id}/availability")
+    public ResponseEntity<ApiResponse<List<VaccineAvailabilityResponse>>> getAvailability(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(publicCatalogService.getVaccineAvailability(id)));
     }
 
     @PostMapping

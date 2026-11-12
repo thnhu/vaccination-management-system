@@ -18,6 +18,7 @@ public class FacilityResponse {
     private String wardCode;
     private String wardName;
     private String phone;
+    private String openingHours;
     private boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
