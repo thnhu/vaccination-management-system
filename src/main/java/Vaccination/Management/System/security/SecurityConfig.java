@@ -36,6 +36,7 @@ public class SecurityConfig {
 //                        ).permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/vaccines/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/administrative-units/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/vaccines/**").hasRole("FACILITY_ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/vaccines/**").hasRole("FACILITY_ADMIN")
                         .requestMatchers(HttpMethod.POST, "/facilities/**").hasRole("FACILITY_ADMIN")

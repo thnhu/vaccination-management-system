@@ -5,8 +5,12 @@ import Vaccination.Management.System.exception.ErrorCode;
 import Vaccination.Management.System.model.dto.auth.CreateLoginRequest;
 import Vaccination.Management.System.model.dto.auth.LoginResponse;
 import Vaccination.Management.System.model.dto.auth.CreateRegisterRequest;
+import Vaccination.Management.System.model.entity.AdministrativeUnit;
+import Vaccination.Management.System.model.entity.CitizenProfile;
 import Vaccination.Management.System.model.entity.User;
 import Vaccination.Management.System.model.enums.UserRole;
+import Vaccination.Management.System.repository.AdministrativeUnitRepository;
+import Vaccination.Management.System.repository.CitizenProfileRepository;
 import Vaccination.Management.System.repository.UserRepository;
 import Vaccination.Management.System.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -14,16 +18,20 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final CitizenProfileRepository citizenProfileRepository;
+    private final AdministrativeUnitRepository administrativeUnitRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
+    @Transactional
     public void register(CreateRegisterRequest request) {
         if (userRepository.existsByPhone(request.getPhone())) {
             throw new AppException(ErrorCode.USER_EXISTED);
@@ -31,6 +39,11 @@ public class AuthService {
         if (request.getEmail() != null && userRepository.existsByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
+        if (citizenProfileRepository.existsByIdCardNumber(request.getIdCardNumber())) {
+            throw new AppException(ErrorCode.ID_CARD_EXISTED);
+        }
+        AdministrativeUnit province = administrativeUnitRepository.findById(request.getProvinceCode())
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_PROVINCE));
         User user = User.builder()
                 .phone(request.getPhone())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -38,7 +51,15 @@ public class AuthService {
                 .email(request.getEmail())
                 .role(UserRole.CITIZEN)
                 .build();
-        userRepository.save(user);
+        user = userRepository.save(user);
+
+        citizenProfileRepository.save(CitizenProfile.builder()
+                .user(user)
+                .idCardNumber(request.getIdCardNumber())
+                .dateOfBirth(request.getDateOfBirth())
+                .gender(request.getGender())
+                .province(province)
+                .build());
     }
 
     public LoginResponse login(CreateLoginRequest request) {

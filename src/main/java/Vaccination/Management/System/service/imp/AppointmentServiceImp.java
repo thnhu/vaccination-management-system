@@ -20,6 +20,8 @@ import Vaccination.Management.System.model.enums.RecordStatus;
 import Vaccination.Management.System.model.enums.UserRole;
 import Vaccination.Management.System.repository.AppointmentRepository;
 import Vaccination.Management.System.repository.AppointmentStatusHistoryRepository;
+import Vaccination.Management.System.repository.CitizenProfileRepository;
+import Vaccination.Management.System.model.entity.CitizenProfile;
 import Vaccination.Management.System.repository.FacilityCapacityRepository;
 import Vaccination.Management.System.repository.FacilityRepository;
 import Vaccination.Management.System.repository.MedicalStaffProfileRepository;
@@ -34,7 +36,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,6 +54,7 @@ public class AppointmentServiceImp implements AppointmentService {
     private final VaccineDoseScheduleRepository vaccineDoseScheduleRepository;
     private final UserRepository userRepository;
     private final MedicalStaffProfileRepository medicalStaffProfileRepository;
+    private final CitizenProfileRepository citizenProfileRepository;
 
     @Override
     @Transactional
@@ -192,10 +198,27 @@ public class AppointmentServiceImp implements AppointmentService {
         MedicalStaffProfile profile = medicalStaffProfileRepository.findByUserId(staffId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        return appointmentRepository
-                .findByFacilityIdAndDate(profile.getFacility().getId(), LocalDate.now())
+        List<Appointment> appointments = appointmentRepository
+                .findByFacilityIdAndDate(profile.getFacility().getId(), LocalDate.now());
+
+        // One query for all citizens' profiles (date of birth, gender) instead of one per appointment.
+        Map<Long, CitizenProfile> profiles = citizenProfileRepository
+                .findByUser_IdIn(appointments.stream().map(a -> a.getCitizen().getId()).distinct().toList())
                 .stream()
-                .map(this::toSummary)
+                .collect(Collectors.toMap(p -> p.getUser().getId(), Function.identity()));
+
+        // Staff must be able to check who is in front of them (name + date of birth) and contact them later.
+        return appointments.stream()
+                .map(a -> {
+                    CitizenProfile cp = profiles.get(a.getCitizen().getId());
+                    return toSummary(a).toBuilder()
+                            .citizenId(a.getCitizen().getId())
+                            .citizenName(a.getCitizen().getFullName())
+                            .citizenPhone(a.getCitizen().getPhone())
+                            .citizenDateOfBirth(cp != null ? cp.getDateOfBirth() : null)
+                            .citizenGender(cp != null ? cp.getGender() : null)
+                            .build();
+                })
                 .toList();
     }
 

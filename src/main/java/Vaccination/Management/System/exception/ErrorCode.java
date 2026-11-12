@@ -20,6 +20,11 @@ public enum ErrorCode {
     INVALID_PHONE(1005, "Phone must be 10-15 digits", HttpStatus.BAD_REQUEST),
     ACCESS_DENIED(1006, "Access denied", HttpStatus.FORBIDDEN),
     UNAUTHORIZED(1008, "Unauthorized", HttpStatus.UNAUTHORIZED),
+    INVALID_DATE_OF_BIRTH(1009, "Date of birth is required and must be in the past", HttpStatus.BAD_REQUEST),
+    INVALID_GENDER(1010, "Gender is required", HttpStatus.BAD_REQUEST),
+    INVALID_ID_CARD(1011, "ID card number must be 12 digits", HttpStatus.BAD_REQUEST),
+    ID_CARD_EXISTED(1012, "ID card number already in use", HttpStatus.CONFLICT),
+    INVALID_PROVINCE(1013, "A valid province is required", HttpStatus.BAD_REQUEST),
 
     // Vaccine
     VACCINE_NOT_FOUND(2001, "Vaccine not found", HttpStatus.NOT_FOUND),
